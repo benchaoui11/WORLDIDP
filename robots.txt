@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /_white
+Disallow: /api/
+
+# Application funnel (no SEO value)
+Disallow: /checkout.html
+Disallow: /payment.html
+Disallow: /upload-photos.html
+
+Sitemap: https://worldidp.com/sitemap.xml
