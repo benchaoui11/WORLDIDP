@@ -4,12 +4,12 @@
 
   // ── Auth guard: no session -> back to login ──
   const { data: { session } } = await client.auth.getSession();
-  if (!session) { location.href = 'login.html'; return; }
+  if (!session) { location.href = '/admin/login.html'; return; }
   document.getElementById('admin-email').textContent = session.user.email;
 
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await client.auth.signOut();
-    location.href = 'login.html';
+    location.href = '/admin/login.html';
   });
 
   const MODE_LABEL = { offer: 'OFFER PAGE', white: 'WHITE PAGE', maintenance: 'MAINTENANCE' };
