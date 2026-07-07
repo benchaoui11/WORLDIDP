@@ -193,7 +193,7 @@
       showToast(`Live site switched to ${MODE_LABEL[pendingMode]}`);
       loadLog();
     } catch (e) {
-      showToast('Could not switch — please try again', true);
+      showToast('Error: ' + (e.message || 'unknown'), true); console.error('[switch-mode]', e);
     } finally {
       overlay.classList.remove('show');
       modalConfirm.disabled = false;
