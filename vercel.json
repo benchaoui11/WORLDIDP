@@ -1,5 +1,44 @@
 {
+  "functions": {
+    "api/gate.js": {
+      "includeFiles": "{*.html,_white/*.html,_white/apply/*.html}"
+    }
+  },
   "rewrites": [
-    { "source": "/apply", "destination": "/pricing.html" }
+    { "source": "/", "destination": "/api/gate" },
+    { "source": "/index.html", "destination": "/api/gate" },
+    { "source": "/countries.html", "destination": "/api/gate" },
+    { "source": "/what-is-idp.html", "destination": "/api/gate" },
+
+    { "source": "/about.html", "destination": "/api/gate" },
+    { "source": "/contact.html", "destination": "/api/gate" },
+    { "source": "/cookies.html", "destination": "/api/gate" },
+    { "source": "/disclaimer.html", "destination": "/api/gate" },
+    { "source": "/privacy.html", "destination": "/api/gate" },
+    { "source": "/refunds.html", "destination": "/api/gate" },
+    { "source": "/shipping.html", "destination": "/api/gate" },
+    { "source": "/terms.html", "destination": "/api/gate" },
+
+    { "source": "/about-us.html", "destination": "/api/gate" },
+    { "source": "/contact-us.html", "destination": "/api/gate" },
+    { "source": "/cookie-policy.html", "destination": "/api/gate" },
+    { "source": "/legal-disclaimer.html", "destination": "/api/gate" },
+    { "source": "/privacy-policy.html", "destination": "/api/gate" },
+    { "source": "/refund-return-policy.html", "destination": "/api/gate" },
+    { "source": "/shipping-policy.html", "destination": "/api/gate" },
+    { "source": "/terms-of-service.html", "destination": "/api/gate" },
+    { "source": "/acceptable-use-policy.html", "destination": "/api/gate" },
+    { "source": "/accessibility-statement.html", "destination": "/api/gate" },
+    { "source": "/dmca-and-intellectual-property-policy.html", "destination": "/api/gate" },
+    { "source": "/payment-policy.html", "destination": "/api/gate" },
+    { "source": "/checkout.html", "destination": "/api/gate" },
+    { "source": "/payment.html", "destination": "/api/gate" },
+    { "source": "/pricing.html", "destination": "/api/gate" },
+    { "source": "/faq.html", "destination": "/api/gate" },
+    { "source": "/track-order.html", "destination": "/api/gate" },
+    { "source": "/upload-photos.html", "destination": "/api/gate" },
+
+    { "source": "/apply", "destination": "/api/gate" },
+    { "source": "/apply/(.*)", "destination": "/api/gate" }
   ]
 }
