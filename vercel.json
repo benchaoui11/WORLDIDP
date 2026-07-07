@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/gate.js": {
-      "includeFiles": "{*.html,_white/*.html,_white/apply/*.html}"
+      "includeFiles": "{_offer/*.html,_white/*.html,_white/apply/*.html}"
     }
   },
   "rewrites": [
