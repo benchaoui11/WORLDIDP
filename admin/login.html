@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
 <title>Admin Sign In | WorldIDP</title>
-<link rel="stylesheet" href="admin.css" />
+<link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
   <div class="login-screen">
@@ -32,7 +32,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="../supabase-config.js"></script>
+  <script src="/supabase-config.js"></script>
   <script>
     (async function () {
       const cfg = window.WORLDIDP_SUPABASE || {};
@@ -40,7 +40,7 @@
 
       // Already signed in? go straight to the dashboard.
       const { data: { session } } = await client.auth.getSession();
-      if (session) { location.href = 'index.html'; return; }
+      if (session) { location.href = '/admin'; return; }
 
       const form = document.getElementById('login-form');
       const btn = document.getElementById('login-btn');
@@ -62,7 +62,7 @@
           btn.disabled = false; btn.textContent = 'Sign in';
           return;
         }
-        location.href = 'index.html';
+        location.href = '/admin';
       });
     })();
   </script>
