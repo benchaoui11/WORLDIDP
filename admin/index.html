@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Control Tower | WorldIDP Admin</title>
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="shell">
+
+    <!-- ═══ Top bar ═══ -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark">W</div>
+        <div class="title">WorldIDP<small>Control Tower</small></div>
+      </div>
+      <div class="topbar-right">
+        <span class="admin-chip" id="admin-email">—</span>
+        <button class="logout-btn" id="logout-btn">Sign out</button>
+      </div>
+    </div>
+
+    <!-- ═══ Signature: live status board ═══ -->
+    <div class="board">
+      <div class="board-row">
+        <div>
+          <p class="board-eyebrow">Now showing to every visitor</p>
+          <h1 class="board-mode" id="board-mode">
+            <span class="board-dot live" id="board-dot"></span>
+            <span id="board-mode-text" class="skeleton">OFFER PAGE</span>
+          </h1>
+        </div>
+        <div class="board-meta">
+          <span>Last switch: <b id="meta-last-switch">—</b></span>
+          <span>By: <b id="meta-last-by">—</b></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Switch controls ═══ -->
+    <div class="switch-grid">
+      <button class="switch-card" data-mode="offer" id="card-offer">
+        <div class="sc-top">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5ee39d" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+        </div>
+        <h3>Offer Page</h3>
+        <p>The real production site — pricing, checkout, everything visitors normally see.</p>
+      </button>
+
+      <button class="switch-card" data-mode="white" id="card-white">
+        <div class="sc-top">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffcf5c" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h16"/></svg>
+          </div>
+          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+        </div>
+        <h3>White Page</h3>
+        <p>A neutral, general-information version. Shown to every visitor until switched back.</p>
+      </button>
+
+      <button class="switch-card" data-mode="maintenance" id="card-maintenance">
+        <div class="sc-top">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.86l-8.2 14.2A1.5 1.5 0 0 0 3.4 20.5h17.2a1.5 1.5 0 0 0 1.3-2.44l-8.2-14.2a1.5 1.5 0 0 0-2.6 0Z"/></svg>
+          </div>
+          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+        </div>
+        <h3>Maintenance</h3>
+        <p>A brief "we'll be right back" page. Use for short, occasional pauses.</p>
+      </button>
+    </div>
+
+    <!-- ═══ Sales analytics (real data from the applications table) ═══ -->
+    <p class="section-label">Sales</p>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Total orders</div><div class="value skeleton" id="stat-orders-total">—</div></div>
+      <div class="stat-card"><div class="label">Orders today</div><div class="value skeleton" id="stat-orders-today">—</div></div>
+      <div class="stat-card"><div class="label">Orders this week</div><div class="value skeleton" id="stat-orders-week">—</div></div>
+      <div class="stat-card"><div class="label">Revenue (total)</div><div class="value skeleton" id="stat-revenue-total">—</div></div>
+    </div>
+
+    <!-- ═══ Visitor analytics ═══ -->
+    <p class="section-label">Visitors</p>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Total visitors</div><div class="value skeleton" id="stat-visitors-total">—</div></div>
+      <div class="stat-card"><div class="label">Visitors today</div><div class="value skeleton" id="stat-visitors-today">—</div></div>
+      <div class="stat-card"><div class="label">Visitors this week</div><div class="value skeleton" id="stat-visitors-week">—</div></div>
+      <div class="stat-card"><div class="label">Active mode</div><div class="value" id="stat-active-mode" style="font-size:1rem;">—</div></div>
+    </div>
+
+    <!-- ═══ Recent visitors table ═══ -->
+    <div class="panel">
+      <div class="panel-head"><h4>Recent visitors</h4><span id="recent-visitors-count"></span></div>
+      <table>
+        <thead><tr><th>Time</th><th>Country</th><th>Device</th><th>Browser / OS</th><th>Referrer</th><th>Landing page</th></tr></thead>
+        <tbody id="visitors-tbody">
+          <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ Switch history ═══ -->
+    <div class="panel">
+      <div class="panel-head"><h4>Switch history</h4><span>Who changed the live mode, and when</span></div>
+      <table>
+        <thead><tr><th>Time</th><th>From</th><th>To</th><th>Changed by</th></tr></thead>
+        <tbody id="log-tbody">
+          <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ═══ Confirmation modal ═══ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-title">Switch the live site?</h3>
+      <p id="modal-body">This will immediately change what every visitor sees.</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modal-cancel">Cancel</button>
+        <button class="modal-confirm" id="modal-confirm">Confirm switch</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Toast ═══ -->
+  <div class="toast" id="toast"><span class="dot"></span><span id="toast-text">Done</span></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
