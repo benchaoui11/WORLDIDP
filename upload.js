@@ -365,6 +365,25 @@
     }
   }
 
+  function showTestSuccessNotice(order) {
+    const card = overlay.querySelector(".po-card");
+    if (card) {
+      card.innerHTML =
+        '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;' +
+        'background:linear-gradient(135deg,#15a06b,#1fc285);color:#fff;">' +
+        '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+        'stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
+        '<h3>Test payment order created successfully.</h3>' +
+        '<p style="margin-top:2px">Order reference: <b>' + order.ref + '</b>.</p>' +
+        '<button type="button" id="test-ok-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;' +
+        'padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
+      card.querySelector("#test-ok-close")?.addEventListener("click", () => {
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+      });
+    }
+  }
+
   // Collect the captured images + signature as data URLs.
   function collectFiles() {
     const get = (sel) => { const el = $(sel); return el && el.src && el.src.startsWith("data:") ? el.src : null; };
@@ -484,17 +503,17 @@
     const res = await window.worldidpSubmitOrder(full);
     if (!res.ok) { showError(res.error); return; }
 
-    const paymentPayload = window.WorldIDPPayment.buildPayload({
+    const paymentPayload = window.WorldIDPPayment.buildTestCheckoutPayload({
       format: order.format,
       validYears: order.validYears,
       express: false, // no express-processing choice in the digital-only flow's UI today
       email: order.email,
-      ref: order.ref,
+      orderReference: order.ref,
     });
-    const result = await window.WorldIDPPayment.submitPayment(paymentPayload);
+    const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
     if (result.ok) {
-      window.location.href = result.redirectUrl;
+      showTestSuccessNotice(order);
     } else {
       showDemoNotice(order, paymentPayload.product_code);
     }

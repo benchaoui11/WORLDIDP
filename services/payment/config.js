@@ -10,4 +10,7 @@ window.WORLDIDP_PAYMENT_CONFIG = {
   PAYMENT_API_BASE: "https://pay.promptzeno.com",
   WEBSITE: "worldidp",
   API_VERSION: "v1",
+  ENDPOINTS: {
+    CREATE_CHECKOUT: "/api/pay/create-checkout",
+  },
 };
