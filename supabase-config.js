@@ -75,13 +75,13 @@ function _dataUrlToBlob(dataUrl) {
      ref, format, validYears, country, total, currency,
      firstName, lastName, email, phone, category,
      // delivery (physical only) — optional:
-     address1, address2, state, city, zip, shippingMethod, vip, coupon,
+     address1, address2, state, city, zip, shippingMethod, express, coupon,
      // files as data URLs:
      files: { selfie, front, back, signature }
    }
    Returns { ok:true } on success, or { ok:false, error } on failure.
    If Supabase isn't configured yet, returns { ok:true, skipped:true } so the
-   flow continues to Stripe during development.
+   flow continues to the payment step during development.
    ------------------------------------------------------------------------- */
 window.worldidpSubmitOrder = async function (order) {
   if (!window.worldidpSupabaseReady()) {
@@ -133,7 +133,7 @@ window.worldidpSubmitOrder = async function (order) {
       city: order.city || null,
       postal_code: order.zip || null,
       shipping_method: order.shippingMethod || null,
-      vip_processing: !!order.vip,
+      vip_processing: !!order.express, // DB column name kept as-is; renaming it needs a migration, out of scope here
       coupon: order.coupon || null,
       // file paths in storage
       file_selfie: fileUrls.selfie || null,

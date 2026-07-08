@@ -24,7 +24,7 @@
     category: saved.category || "",
   };
 
-  // Digital orders use this page too, but with only the speed (VIP) choice —
+  // Digital orders use this page too, but with only the speed (express-processing) choice —
   // no address, no shipping. Hide the physical-only sections for them.
   const isDigital = order.format !== "physical";
   if (isDigital) {
@@ -70,22 +70,22 @@
   $("[data-fmt-label]").textContent = order.format === "physical" ? "Print + Digital" : "Digital Only";
 
   /* ---------- pricing state ---------- */
-  const state = { shipping: isDigital ? 0 : 9, vip: true, vipPrice: 19, couponPct: 0, couponCode: "" };
+  const state = { shipping: isDigital ? 0 : 9, express: true, expressPrice: 19, couponPct: 0, couponCode: "" };
 
   function recalc() {
     const product = productPrice;
     const ship = state.shipping;
-    const vip = state.vip ? state.vipPrice : 0;
-    const subtotal = product + ship + vip;
+    const express = state.express ? state.expressPrice : 0;
+    const subtotal = product + ship + express;
     const discount = Math.round(subtotal * state.couponPct);
     const total = subtotal - discount;
 
     $("[data-sum-ship]").textContent = `$${ship}`;
     const shipLine = $('[data-line="ship"]') || $("[data-sum-ship]").closest(".sl, .sum-line, li, .summary-row");
     if (isDigital && shipLine) shipLine.classList.add("is-hidden");
-    const vipLine = $('[data-line="vip"]');
-    if (state.vip) { vipLine.classList.remove("is-hidden"); $("[data-sum-vip]").textContent = `$${vip}`; }
-    else vipLine.classList.add("is-hidden");
+    const expressLine = $('[data-line="express"]');
+    if (state.express) { expressLine.classList.remove("is-hidden"); $("[data-sum-express]").textContent = `$${express}`; }
+    else expressLine.classList.add("is-hidden");
 
     const couponLine = $('[data-line="coupon"]');
     const wasEl = $("[data-sum-was]");
@@ -117,14 +117,14 @@
     });
   });
 
-  /* ---------- VIP checkbox ---------- */
-  const vipEl = $("[data-vip]");
-  vipEl.addEventListener("click", (e) => {
+  /* ---------- express-processing checkbox ---------- */
+  const expressEl = $("[data-express]");
+  expressEl.addEventListener("click", (e) => {
     e.preventDefault();
-    state.vip = !state.vip;
-    vipEl.classList.toggle("is-active", state.vip);
-    $("input", vipEl).checked = state.vip;
-    state.vipPrice = parseInt(vipEl.dataset.price, 10);
+    state.express = !state.express;
+    expressEl.classList.toggle("is-active", state.express);
+    $("input", expressEl).checked = state.express;
+    state.expressPrice = parseInt(expressEl.dataset.price, 10);
     recalc();
   });
 
@@ -170,7 +170,7 @@
   }));
   $("#agree").addEventListener("change", () => $("[data-terms]").classList.remove("show-err"));
 
-  /* ---------- submit → Supabase → Stripe ---------- */
+  /* ---------- submit → Supabase → payment service ---------- */
   const overlay = $("#overlay");
   const form = $("#pay-form");
 
@@ -192,12 +192,12 @@
       '<button type="button" id="err-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Try again</button>';
     card.querySelector("#err-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
   }
-  function showDemoNotice(ref, key) {
+  function showDemoNotice(ref, productCode) {
     const card = overlay.querySelector(".po-card");
     card.innerHTML =
       '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#1c3da0,#4f86ff);color:#fff;">' +
       '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 11h20M6 15h4"/></svg></div>' +
-      '<h3>Payment is in test mode</h3><p style="margin-top:2px">Add your Stripe link for <b>'+key+'</b> in <b>stripe-links.js</b> and set <b>live: true</b>. Order reference: <b>'+ref+'</b>.</p>' +
+      '<h3>Payment isn\'t connected yet</h3><p style="margin-top:2px">This order (<b>'+productCode+'</b>) has been prepared but payment processing isn\'t live yet. Order reference: <b>'+ref+'</b>.</p>' +
       '<button type="button" id="demo-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
     card.querySelector("#demo-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
   }
@@ -234,7 +234,7 @@
       city: $("#city").value.trim(),
       zip: $("#zip").value.trim(),
       shippingMethod: shipName,
-      vip: state.vip,
+      express: state.express,
       coupon: state.couponCode || null,
       files: getFiles(),
     };
@@ -243,13 +243,18 @@
     const res = await window.worldidpSubmitOrder(payload);
     if (!res.ok) { showError(res.error); return; }
 
-    // 2) Redirect to the correct Stripe Payment Link.
-    const link = window.worldidpStripeUrl
-      ? window.worldidpStripeUrl({ format: order.format, validYears: order.validYears, email: order.email, ref })
-      : { ok:false, key: order.format + "-" + order.validYears };
+    // 2) Hand off to the payment service (backend integration comes later).
+    const paymentPayload = window.WorldIDPPayment.buildPayload({
+      format: order.format,
+      validYears: order.validYears,
+      express: state.express,
+      email: order.email,
+      ref,
+    });
+    const result = await window.WorldIDPPayment.submitPayment(paymentPayload);
 
-    if (link.ok) window.location.href = link.url;
-    else showDemoNotice(ref, link.key);
+    if (result.ok) window.location.href = result.redirectUrl;
+    else showDemoNotice(ref, paymentPayload.product_code);
   });
 
   /* ---------- header scroll ---------- */

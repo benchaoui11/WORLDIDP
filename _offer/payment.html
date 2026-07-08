@@ -173,7 +173,7 @@
           </div>
         </section>
 
-        <!-- VIP add-on -->
+        <!-- Express processing add-on -->
         <section class="section">
           <div class="fieldset-head">
             <span class="fs-num">4</span>
@@ -181,13 +181,13 @@
           </div>
           <p class="fieldset-sub">Optional — jump the queue and get your digital IDP issued in minutes.</p>
 
-          <label class="vip is-active" data-vip data-price="19" data-was="29">
-            <input type="checkbox" name="vip" checked />
-            <span class="vip-rec">Recommended</span>
-            <span class="vip-check" aria-hidden="true"></span>
-            <span class="vip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
-            <span class="vip-meta"><span class="vm-name">VIP processing</span><span class="vm-sub">Digital IDP ready in ~5 minutes</span></span>
-            <span class="vip-price"><span class="vp-now">+$19</span><span class="vp-was">$29</span></span>
+          <label class="express is-active" data-express data-price="19" data-was="29">
+            <input type="checkbox" name="express" checked />
+            <span class="express-rec">Recommended</span>
+            <span class="express-check" aria-hidden="true"></span>
+            <span class="express-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
+            <span class="express-meta"><span class="vm-name">VIP processing</span><span class="vm-sub">Digital IDP ready in ~5 minutes</span></span>
+            <span class="express-price"><span class="vp-now">+$19</span><span class="vp-was">$29</span></span>
           </label>
         </section>
       </div>
@@ -218,9 +218,9 @@
             <span class="sl-k">Express shipping</span>
             <span class="sl-v" data-sum-ship>$29</span>
           </div>
-          <div class="sum-line" data-line="vip">
+          <div class="sum-line" data-line="express">
             <span class="sl-k">VIP processing</span>
-            <span class="sl-v" data-sum-vip>$29</span>
+            <span class="sl-v" data-sum-express>$29</span>
           </div>
           <div class="sum-line sum-disc is-hidden" data-line="coupon">
             <span class="sl-k">Coupon <span data-coupon-code></span></span>
@@ -261,7 +261,7 @@
 
           <div class="trust-row">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            Secure encrypted payment · powered by Stripe
+            Secure encrypted payment
           </div>
 
           <div class="pay-strip" aria-label="Accepted payment methods">
@@ -299,7 +299,9 @@
   </div>
 
   <script src="supabase-config.js" defer></script>
-  <script src="stripe-links.js" defer></script>
+  <script src="/services/payment/config.js" defer></script>
+  <script src="/services/payment/product-codes.js" defer></script>
+  <script src="/services/payment/payment-service.js" defer></script>
   <script src="payment.js" defer></script>
   <script src="/analytics-beacon.js" defer></script>
 </body>

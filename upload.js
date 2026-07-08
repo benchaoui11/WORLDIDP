@@ -321,7 +321,7 @@
   requestAnimationFrame(fitCanvas);
 
   /* =======================================================================
-     SUBMIT → route to the correct Stripe Payment Link
+     SUBMIT → hand off to the payment service
      ======================================================================= */
   const overlay = $("#overlay");
 
@@ -331,10 +331,10 @@
     let saved = {};
     try { saved = JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch (e) {}
     // sessionStorage wins over URL so a Digital⇄Print switch is always reflected
-    // in the Stripe link and totals.
+    // in the totals and the product code sent to the payment service.
     const format = saved.format || p.get("format") || "digital";
     const validYears = parseInt(saved.validYears || p.get("valid") || "3", 10);
-    // a short, unique order reference so you can match the payment in Stripe
+    // a short, unique order reference so the payment can be matched to this order
     let ref = "";
     try { ref = sessionStorage.getItem("worldidp_ref") || ""; } catch (e) {}
     if (!ref) {
@@ -344,7 +344,7 @@
     return { format, validYears, email: saved.email || "", ref, country: saved.country || p.get("country") || "" };
   }
 
-  function showDemoNotice(order, key) {
+  function showDemoNotice(order, productCode) {
     const card = overlay.querySelector(".po-card");
     if (card) {
       card.innerHTML =
@@ -353,9 +353,9 @@
         '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" ' +
         'stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/>' +
         '<path d="M2 11h20M6 15h4"/></svg></div>' +
-        '<h3>Payment is in test mode</h3>' +
-        '<p style="margin-top:2px">Add your Stripe link for <b>' + key + '</b> in <b>stripe-links.js</b> ' +
-        'and set <b>live: true</b>. Your order reference is <b>' + order.ref + '</b>.</p>' +
+        '<h3>Payment isn\'t connected yet</h3>' +
+        '<p style="margin-top:2px">This order (<b>' + productCode + '</b>) has been prepared but payment processing ' +
+        'isn\'t live yet. Your order reference is <b>' + order.ref + '</b>.</p>' +
         '<button type="button" id="demo-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;' +
         'padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
       card.querySelector("#demo-close")?.addEventListener("click", () => {
@@ -472,7 +472,7 @@
       return;
     }
 
-    /* ---- DIGITAL ONLY: upload now, then straight to Stripe ---- */
+    /* ---- DIGITAL ONLY: upload now, then hand off to the payment service ---- */
     const saved = (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch (e) { return {}; } })();
     const full = Object.assign({}, order, {
       firstName: saved.firstName, lastName: saved.lastName, email: saved.email,
@@ -484,11 +484,19 @@
     const res = await window.worldidpSubmitOrder(full);
     if (!res.ok) { showError(res.error); return; }
 
-    const link = window.worldidpStripeUrl ? window.worldidpStripeUrl(order) : { ok: false, key: order.format + "-" + order.validYears };
-    if (link.ok) {
-      window.location.href = link.url;
+    const paymentPayload = window.WorldIDPPayment.buildPayload({
+      format: order.format,
+      validYears: order.validYears,
+      express: false, // no express-processing choice in the digital-only flow's UI today
+      email: order.email,
+      ref: order.ref,
+    });
+    const result = await window.WorldIDPPayment.submitPayment(paymentPayload);
+
+    if (result.ok) {
+      window.location.href = result.redirectUrl;
     } else {
-      showDemoNotice(order, link.key);
+      showDemoNotice(order, paymentPayload.product_code);
     }
   });
 
