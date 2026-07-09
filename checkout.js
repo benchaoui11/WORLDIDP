@@ -368,9 +368,10 @@
   onScroll();
 
   /* ---------- read query params (from homepage eligibility form) ---------- */
-  // e.g. checkout.html?destination-country=France&format=physical
+  // e.g. checkout.html?destination-country=France&format=physical&valid=3
   const params = new URLSearchParams(location.search);
   const qpFormat = params.get("format");
+  const qpValid = parseInt(params.get("valid"), 10);
   const qpDest = params.get("destination-country");
   if (qpDest && byName(qpDest)) {
     residenceSel.value = qpDest;
@@ -378,6 +379,22 @@
 
   /* ---------- init ---------- */
   setFormat(qpFormat === "physical" ? "physical" : "digital");
+
+  // BUG FIX: the pricing page's 1/2/3 Year selection used to never reach
+  // this page at all, so this step silently fell back to its own
+  // hardcoded 1-year default no matter what the customer picked. Now the
+  // year passed in the URL (if any) overrides that default, and the
+  // matching tab is highlighted so what's displayed matches what's used.
+  if ([1, 2, 3].includes(qpValid)) {
+    state.validYears = qpValid;
+    const matchingTab = $$(".valid-tab").find((t) => parseInt(t.dataset.valid, 10) === qpValid);
+    if (matchingTab) {
+      $$(".valid-tab").forEach((t) => t.classList.remove("active"));
+      matchingTab.classList.add("active");
+      state.validUntil = matchingTab.dataset.year;
+    }
+    recalc();
+  }
 
   // If the customer chose Digital, hide the Print + Digital upsell (keep validity choice)
   if (qpFormat !== "physical") {

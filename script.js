@@ -462,6 +462,20 @@ if (logoTrack) {
     });
   }
 
+  // BUG FIX: previously only the displayed price updated when switching
+  // 1/2/3 Year tabs — the "Continue" button's link always pointed at
+  // "checkout.html?format=X" with no year at all, so checkout.html fell
+  // back to its own hardcoded default (1 year) regardless of what was
+  // selected here. Now the link always carries the currently active year.
+  function updateCtaLinks(years) {
+    cards.forEach((card) => {
+      const cta = card.querySelector(".pc-cta");
+      if (!cta) return;
+      const format = cardFormat(card);
+      cta.setAttribute("href", `checkout.html?format=${format}&valid=${years}`);
+    });
+  }
+
   function select(idx) {
     opts.forEach((o, i) => {
       const active = i === idx;
@@ -474,6 +488,7 @@ if (logoTrack) {
     validEls.forEach((el) => (el.textContent = label));
     const years = parseInt(opt.dataset.years, 10) || (idx + 1);
     setPrices(years);
+    updateCtaLinks(years);
   }
 
   opts.forEach((opt, i) => opt.addEventListener("click", () => select(i)));

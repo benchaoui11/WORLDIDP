@@ -510,6 +510,7 @@
       email: order.email,
       orderReference: order.ref,
     });
+    console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
     if (result.ok) {

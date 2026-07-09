@@ -260,6 +260,7 @@
       email: order.email,
       orderReference: ref,
     });
+    console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
     if (result.ok) showTestSuccessNotice(ref);
