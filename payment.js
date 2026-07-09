@@ -70,19 +70,17 @@
   $("[data-fmt-label]").textContent = order.format === "physical" ? "Print + Digital" : "Digital Only";
 
   /* ---------- pricing state ---------- */
-  const state = { shipping: isDigital ? 0 : 9, express: false, expressPrice: 19, couponPct: 0, couponCode: "" };
+  // Shipping is always free now — it never affects the total, so it's not
+  // part of this pricing state at all anymore (previously: state.shipping).
+  const state = { express: false, expressPrice: 14, couponPct: 0, couponCode: "" };
 
   function recalc() {
     const product = productPrice;
-    const ship = state.shipping;
     const express = state.express ? state.expressPrice : 0;
-    const subtotal = product + ship + express;
+    const subtotal = product + express;
     const discount = Math.round(subtotal * state.couponPct);
     const total = subtotal - discount;
 
-    $("[data-sum-ship]").textContent = `$${ship}`;
-    const shipLine = $('[data-line="ship"]') || $("[data-sum-ship]").closest(".sl, .sum-line, li, .summary-row");
-    if (isDigital && shipLine) shipLine.classList.add("is-hidden");
     const expressLine = $('[data-line="express"]');
     if (state.express) { expressLine.classList.remove("is-hidden"); $("[data-sum-express]").textContent = `$${express}`; }
     else expressLine.classList.add("is-hidden");
@@ -104,18 +102,6 @@
     $("[data-pay-text]").textContent = `Pay $${total} securely`;
     state._total = total;
   }
-
-  /* ---------- shipping radios ---------- */
-  $$(".ship").forEach((opt) => {
-    opt.addEventListener("click", (e) => {
-      e.preventDefault();
-      $$(".ship").forEach((o) => o.classList.remove("is-active"));
-      opt.classList.add("is-active");
-      $("input", opt).checked = true;
-      state.shipping = parseInt(opt.dataset.price, 10);
-      recalc();
-    });
-  });
 
   /* ---------- express-processing checkbox ---------- */
   const expressEl = $("[data-express]");
@@ -229,7 +215,7 @@
     overlay.setAttribute("aria-hidden","false");
 
     const ref = getRef(); // stable application ref — reused, never duplicated
-    const shipName = $(".ship.is-active")?.querySelector(".sm-name")?.textContent || "Express shipping";
+    const shipName = "Free Shipping"; // shipping is always free now — no selection to read
 
     const payload = {
       ref,

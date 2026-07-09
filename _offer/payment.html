@@ -147,7 +147,7 @@
           </div>
         </section>
 
-        <!-- shipping -->
+        <!-- shipping — now always free; informational only, not selectable -->
         <section class="section" data-physical-only>
           <div class="fieldset-head">
             <span class="fs-num">3</span>
@@ -155,25 +155,16 @@
           </div>
           <p class="fieldset-sub">Your digital copy is always delivered instantly — this is for the printed booklet.</p>
 
-          <div class="ship-opts" role="radiogroup" aria-label="Shipping method">
-            <label class="ship is-active" data-ship="standard" data-price="9">
-              <input type="radio" name="shipping" value="standard" checked />
-              <span class="ship-check" aria-hidden="true"></span>
+          <div class="ship-opts" role="group" aria-label="Shipping method">
+            <div class="ship ship-free">
               <span class="ship-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10"/></svg></span>
-              <span class="ship-meta"><span class="sm-name">Standard shipping</span><span class="sm-eta">15–30 working days</span></span>
-              <span class="ship-price">$9<small>USD</small></span>
-            </label>
-            <label class="ship" data-ship="express" data-price="29">
-              <input type="radio" name="shipping" value="express" />
-              <span class="ship-check" aria-hidden="true"></span>
-              <span class="ship-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3zM14 9h4l3 3v3h-7zM5.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M1 10h4"/></svg></span>
-              <span class="ship-meta"><span class="sm-name">Express shipping</span><span class="sm-eta">3–7 working days</span></span>
-              <span class="ship-price">$29<small>USD</small></span>
-            </label>
+              <span class="ship-meta"><span class="sm-name">Free Shipping</span><span class="sm-eta">14–25 working days</span></span>
+              <span class="ship-price">Free</span>
+            </div>
           </div>
         </section>
 
-        <!-- Express processing add-on -->
+        <!-- Fast Processing add-on -->
         <section class="section">
           <div class="fieldset-head">
             <span class="fs-num">4</span>
@@ -181,13 +172,13 @@
           </div>
           <p class="fieldset-sub">Optional — jump the queue and get your digital IDP issued in minutes.</p>
 
-          <label class="express" data-express data-price="19" data-was="29">
+          <label class="express" data-express data-price="14">
             <input type="checkbox" name="express" />
             <span class="express-rec">Recommended</span>
             <span class="express-check" aria-hidden="true"></span>
             <span class="express-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
-            <span class="express-meta"><span class="vm-name">VIP processing</span><span class="vm-sub">Digital IDP ready in ~5 minutes</span></span>
-            <span class="express-price"><span class="vp-now">+$19</span><span class="vp-was">$29</span></span>
+            <span class="express-meta"><span class="vm-name">Fast Processing</span><span class="vm-sub">Digital IDP ready in ~8 minutes</span></span>
+            <span class="express-price"><span class="vp-now">+$14</span></span>
           </label>
         </section>
       </div>
@@ -215,12 +206,12 @@
             <span class="sl-v" data-sum-product>$99</span>
           </div>
           <div class="sum-line" data-line="shipping">
-            <span class="sl-k">Express shipping</span>
-            <span class="sl-v" data-sum-ship>$29</span>
+            <span class="sl-k">Shipping</span>
+            <span class="sl-v">Free</span>
           </div>
           <div class="sum-line" data-line="express">
-            <span class="sl-k">VIP processing</span>
-            <span class="sl-v" data-sum-express>$29</span>
+            <span class="sl-k">Fast Processing</span>
+            <span class="sl-v" data-sum-express>$14</span>
           </div>
           <div class="sum-line sum-disc is-hidden" data-line="coupon">
             <span class="sl-k">Coupon <span data-coupon-code></span></span>

@@ -66,6 +66,11 @@ window.WorldIDPPayment = (function () {
         frontend_version: cfg.API_VERSION,
         application_id: order.applicationId || undefined,
         order_reference: order.orderReference || undefined,
+        // Shipping is always free — these are informational only and never
+        // affect product_code, addons, or the computed amount.
+        shipping: "free",
+        shipping_eta: "14-25 working days",
+        fast_processing: !!order.express,
       },
     });
   }

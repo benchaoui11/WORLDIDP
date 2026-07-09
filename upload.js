@@ -15,6 +15,10 @@
     back:  { t:"License — back", ok:"Back uploaded" },
     signature:{ t:"Signature", ok:"Signed" },
   };
+  // Fast Processing (+$14) — Digital-only here. Print + Digital customers
+  // see the exact same addon later, on the delivery/payment page, so it's
+  // not duplicated on this page for them.
+  const addonState = { express: false };
 
   /* =======================================================================
      ORDER RECAP (from URL params + sessionStorage)
@@ -31,23 +35,37 @@
     const country = saved.country || p.get("country") || "Thailand";
 
     const fmtName = format === "physical" ? "Print + Digital IDP" : "Digital Only IDP";
-    // Price table — Digital: 49/55/59 · Print+Digital: 79/89/99 (same canonical
-    // table used on the pricing/checkout/payment pages — this used to be a
-    // separate, stale base+adjustment formula that happened to match the
-    // Print prices by coincidence but produced wrong Digital prices).
-    const PRICES = {
-      digital:  { 1: 49, 2: 55, 3: 59 },
-      physical: { 1: 79, 2: 89, 3: 99 },
-    };
-    const table = PRICES[format] || PRICES.digital;
-    const total = table[years] != null ? table[years] : table[3];
     const expYear = 2026 + years;
 
     const set = (sel,val) => { const el = $(sel); if (el) el.textContent = val; };
     set("[data-recap-format]", fmtName);
     set("[data-recap-valid]", `${years} year${years>1?"s":""} · Expires ${expYear}`);
     set("[data-recap-country]", country);
-    set("[data-recap-total]", String(total));
+
+    function refreshTotal() {
+      set("[data-recap-total]", String(computeTotal(format, years) + (addonState.express ? 14 : 0)));
+    }
+    refreshTotal();
+
+    // Fast Processing is shown here for Digital only. Print + Digital
+    // customers see the exact same addon on the delivery/payment page
+    // next, so it's hidden here to avoid asking twice.
+    const addonSection = document.querySelector("[data-digital-only]");
+    if (format === "physical") {
+      if (addonSection) addonSection.style.display = "none";
+    } else {
+      const expressEl = $("[data-express]");
+      if (expressEl) {
+        expressEl.addEventListener("click", (e) => {
+          e.preventDefault();
+          addonState.express = !addonState.express;
+          expressEl.classList.toggle("is-active", addonState.express);
+          const input = $("input", expressEl);
+          if (input) input.checked = addonState.express;
+          refreshTotal();
+        });
+      }
+    }
   })();
 
   /* =======================================================================
@@ -513,7 +531,7 @@
     const full = Object.assign({}, order, {
       firstName: saved.firstName, lastName: saved.lastName, email: saved.email,
       phone: saved.phone, category: saved.category,
-      total: computeTotal(order.format, order.validYears), currency: "USD",
+      total: computeTotal(order.format, order.validYears) + (addonState.express ? 14 : 0), currency: "USD",
       files,
     });
 
@@ -523,7 +541,7 @@
     const paymentPayload = window.WorldIDPPayment.buildTestCheckoutPayload({
       format: order.format,
       validYears: order.validYears,
-      express: false, // no express-processing choice in the digital-only flow's UI today
+      express: addonState.express, // Fast Processing — customer must manually enable it (see the addon section above)
       email: order.email,
       orderReference: getFreshOrderRef(),
       applicationId: order.ref,
