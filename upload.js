@@ -550,8 +550,10 @@
     console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
-    if (result.ok) {
-      showTestSuccessNotice({ ref: paymentPayload.metadata.order_reference });
+    if (result.ok && result.data?.checkout_url) {
+      window.location.href = result.data.checkout_url;
+    } else if (result.ok) {
+      showTestSuccessNotice({ ref: paymentPayload.metadata.order_reference }); // fallback: no checkout_url in the response
     } else {
       showDemoNotice({ ref: paymentPayload.metadata.order_reference }, paymentPayload.product_code);
     }

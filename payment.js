@@ -259,8 +259,13 @@
     console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
-    if (result.ok) showTestSuccessNotice(orderRef);
-    else showDemoNotice(orderRef, paymentPayload.product_code);
+    if (result.ok && result.data?.checkout_url) {
+      window.location.href = result.data.checkout_url;
+    } else if (result.ok) {
+      showTestSuccessNotice(orderRef); // fallback: no checkout_url in the response
+    } else {
+      showDemoNotice(orderRef, paymentPayload.product_code);
+    }
   });
 
   /* ---------- header scroll ---------- */
