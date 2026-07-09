@@ -351,6 +351,16 @@
     return { format, validYears, email: saved.email || "", ref, country: saved.country || p.get("country") || "" };
   }
 
+  // A brand-new reference for EVERY Pay attempt — intentionally never
+  // persisted/reused. getOrder().ref above stays stable across the whole
+  // session (the application ref, correctly reused so we never duplicate
+  // the applications row); this one must be fresh each time so a retry —
+  // or testing a different plan in the same session — always creates its
+  // own payment_orders row instead of colliding with a previous attempt.
+  function getFreshOrderRef() {
+    return "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
+
   function showDemoNotice(order, productCode) {
     const card = overlay.querySelector(".po-card");
     if (card) {
@@ -515,15 +525,16 @@
       validYears: order.validYears,
       express: false, // no express-processing choice in the digital-only flow's UI today
       email: order.email,
-      orderReference: order.ref,
+      orderReference: getFreshOrderRef(),
+      applicationId: order.ref,
     });
     console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
     if (result.ok) {
-      showTestSuccessNotice(order);
+      showTestSuccessNotice({ ref: paymentPayload.metadata.order_reference });
     } else {
-      showDemoNotice(order, paymentPayload.product_code);
+      showDemoNotice({ ref: paymentPayload.metadata.order_reference }, paymentPayload.product_code);
     }
   });
 

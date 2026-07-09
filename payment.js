@@ -176,6 +176,17 @@
       try { sessionStorage.setItem("worldidp_ref", ref); } catch(e){} }
     return ref;
   }
+  // A brand-new reference for EVERY Pay attempt — intentionally never
+  // persisted/reused. getRef() above stays stable across the whole
+  // session (that's the application ref, correctly reused so we never
+  // duplicate the applications row); this one must be fresh each time so
+  // a retry — or testing a different plan in the same session — always
+  // creates its own payment_orders row instead of colliding with, and
+  // silently reusing, a previous attempt's order (which used to return
+  // stale product_code/amount from an unrelated earlier order).
+  function getFreshOrderRef() {
+    return "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
   function getFiles() { try { return JSON.parse(sessionStorage.getItem("worldidp_files") || "{}"); } catch(e){ return {}; } }
 
   function showError(msg) {
@@ -217,7 +228,7 @@
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
 
-    const ref = getRef();
+    const ref = getRef(); // stable application ref — reused, never duplicated
     const shipName = $(".ship.is-active")?.querySelector(".sm-name")?.textContent || "Express shipping";
 
     const payload = {
@@ -248,18 +259,22 @@
     if (!res.ok) { showError(res.error); return; }
 
     // 2) Hand off to the payment service — TEST MODE call to create-checkout.
+    // orderRef is fresh for THIS attempt; ref (the application ref) rides
+    // along in metadata.application_id so admin can still link the two.
+    const orderRef = getFreshOrderRef();
     const paymentPayload = window.WorldIDPPayment.buildTestCheckoutPayload({
       format: order.format,
       validYears: order.validYears,
       express: state.express,
       email: order.email,
-      orderReference: ref,
+      orderReference: orderRef,
+      applicationId: ref,
     });
     console.log("PAYMENT_PAYLOAD", paymentPayload);
     const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
 
-    if (result.ok) showTestSuccessNotice(ref);
-    else showDemoNotice(ref, paymentPayload.product_code);
+    if (result.ok) showTestSuccessNotice(orderRef);
+    else showDemoNotice(orderRef, paymentPayload.product_code);
   });
 
   /* ---------- header scroll ---------- */
