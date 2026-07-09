@@ -70,7 +70,7 @@
   $("[data-fmt-label]").textContent = order.format === "physical" ? "Print + Digital" : "Digital Only";
 
   /* ---------- pricing state ---------- */
-  const state = { shipping: isDigital ? 0 : 9, express: true, expressPrice: 19, couponPct: 0, couponCode: "" };
+  const state = { shipping: isDigital ? 0 : 9, express: false, expressPrice: 19, couponPct: 0, couponCode: "" };
 
   function recalc() {
     const product = productPrice;

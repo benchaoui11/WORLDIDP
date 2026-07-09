@@ -31,9 +31,16 @@
     const country = saved.country || p.get("country") || "Thailand";
 
     const fmtName = format === "physical" ? "Print + Digital IDP" : "Digital Only IDP";
-    const base = format === "physical" ? 99 : 79;
-    const adj = years === 1 ? -20 : years === 2 ? -10 : 0;
-    const total = base + adj;
+    // Price table — Digital: 49/55/59 · Print+Digital: 79/89/99 (same canonical
+    // table used on the pricing/checkout/payment pages — this used to be a
+    // separate, stale base+adjustment formula that happened to match the
+    // Print prices by coincidence but produced wrong Digital prices).
+    const PRICES = {
+      digital:  { 1: 49, 2: 55, 3: 59 },
+      physical: { 1: 79, 2: 89, 3: 99 },
+    };
+    const table = PRICES[format] || PRICES.digital;
+    const total = table[years] != null ? table[years] : table[3];
     const expYear = 2026 + years;
 
     const set = (sel,val) => { const el = $(sel); if (el) el.textContent = val; };
@@ -521,9 +528,15 @@
   });
 
   function computeTotal(format, years) {
-    const base = format === "physical" ? 99 : 79;
-    const adj = years === 1 ? -20 : years === 2 ? -10 : 0;
-    return base + adj;
+    // Same canonical table as the pricing/checkout/payment pages — see the
+    // note in the recap() function above for why this replaced the old
+    // base+adjustment formula.
+    const PRICES = {
+      digital:  { 1: 49, 2: 55, 3: 59 },
+      physical: { 1: 79, 2: 89, 3: 99 },
+    };
+    const table = PRICES[format] || PRICES.digital;
+    return table[years] != null ? table[years] : table[3];
   }
 
   /* ---------- header scroll state ---------- */
