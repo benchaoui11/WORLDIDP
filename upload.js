@@ -532,6 +532,7 @@
       firstName: saved.firstName, lastName: saved.lastName, email: saved.email,
       phone: saved.phone, category: saved.category,
       total: computeTotal(order.format, order.validYears) + (addonState.express ? 14 : 0), currency: "USD",
+      express: addonState.express, // was missing entirely — this is why applications.vip_processing stayed false
       files,
     });
 
