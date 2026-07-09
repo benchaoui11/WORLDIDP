@@ -8,116 +8,256 @@
 <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
-  <div class="shell">
 
-    <!-- ═══ Top bar ═══ -->
-    <div class="topbar">
-      <div class="brand">
+  <div class="app-shell">
+
+    <!-- ═══ Sidebar ═══ -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
         <div class="mark">W</div>
         <div class="title">WorldIDP<small>Control Tower</small></div>
       </div>
-      <div class="topbar-right">
+      <nav class="side-nav">
+        <button class="side-link is-active" data-page="overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <span>Overview</span>
+        </button>
+        <button class="side-link" data-page="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="side-link" data-page="orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+          <span>Orders</span>
+        </button>
+        <button class="side-link" data-page="visitors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Visitors</span>
+        </button>
+        <button class="side-link" data-page="switch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          <span>Site Switch</span>
+        </button>
+      </nav>
+      <div class="sidebar-foot">
         <span class="admin-chip" id="admin-email">—</span>
         <button class="logout-btn" id="logout-btn">Sign out</button>
       </div>
-    </div>
+    </aside>
 
-    <!-- ═══ Signature: live status board ═══ -->
-    <div class="board">
-      <div class="board-row">
-        <div>
-          <p class="board-eyebrow">Now showing to every visitor</p>
-          <h1 class="board-mode" id="board-mode">
-            <span class="board-dot live" id="board-dot"></span>
-            <span id="board-mode-text" class="skeleton">OFFER PAGE</span>
-          </h1>
-        </div>
-        <div class="board-meta">
-          <span>Last switch: <b id="meta-last-switch">—</b></span>
-          <span>By: <b id="meta-last-by">—</b></span>
-        </div>
-      </div>
-    </div>
+    <!-- ═══ Main content ═══ -->
+    <main class="main-area">
 
-    <!-- ═══ Switch controls ═══ -->
-    <div class="switch-grid">
-      <button class="switch-card" data-mode="offer" id="card-offer">
-        <div class="sc-top">
-          <div class="sc-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#5ee39d" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <!-- ───────────────────────── OVERVIEW ───────────────────────── -->
+      <section class="page is-active" data-page-panel="overview">
+        <div class="page-head">
+          <h1>Overview</h1>
+          <p>A snapshot of applications, orders and traffic.</p>
+        </div>
+
+        <div id="overview-error" class="state-banner state-error" hidden></div>
+
+        <p class="section-label">Applications</p>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Total applications</div><div class="value skeleton" id="ov-app-total">—</div></div>
+          <div class="stat-card"><div class="label">Pending</div><div class="value skeleton" id="ov-app-pending">—</div></div>
+          <div class="stat-card"><div class="label">Completed</div><div class="value skeleton" id="ov-app-completed">—</div></div>
+          <div class="stat-card"><div class="label">Visitors (total)</div><div class="value skeleton" id="ov-visitors-total">—</div></div>
+        </div>
+
+        <p class="section-label">Payment orders</p>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Total orders</div><div class="value skeleton" id="ov-orders-total">—</div></div>
+          <div class="stat-card"><div class="label">Pending</div><div class="value skeleton" id="ov-orders-pending">—</div></div>
+          <div class="stat-card"><div class="label">Paid</div><div class="value skeleton" id="ov-orders-paid">—</div></div>
+          <div class="stat-card"><div class="label">Revenue (paid)</div><div class="value skeleton" id="ov-revenue-total">—</div></div>
+        </div>
+        <p class="hint-note" id="ov-revenue-hint" hidden>Revenue only counts orders with status "paid". Since payment confirmation isn't wired up yet, this will read $0 until that's connected.</p>
+      </section>
+
+      <!-- ───────────────────────── ANALYTICS ───────────────────────── -->
+      <section class="page" data-page-panel="analytics">
+        <div class="page-head">
+          <h1>Analytics</h1>
+          <p>Last 14 days.</p>
+        </div>
+        <div id="analytics-error" class="state-banner state-error" hidden></div>
+        <div class="chart-grid">
+          <div class="panel chart-panel">
+            <div class="panel-head"><h4>Applications by day</h4></div>
+            <div class="chart-wrap"><canvas id="chart-applications"></canvas></div>
           </div>
-          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
-        </div>
-        <h3>Offer Page</h3>
-        <p>The real production site — pricing, checkout, everything visitors normally see.</p>
-      </button>
-
-      <button class="switch-card" data-mode="white" id="card-white">
-        <div class="sc-top">
-          <div class="sc-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#ffcf5c" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h16"/></svg>
+          <div class="panel chart-panel">
+            <div class="panel-head"><h4>Orders by day</h4></div>
+            <div class="chart-wrap"><canvas id="chart-orders"></canvas></div>
           </div>
-          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
-        </div>
-        <h3>White Page</h3>
-        <p>A neutral, general-information version. Shown to every visitor until switched back.</p>
-      </button>
-
-      <button class="switch-card" data-mode="maintenance" id="card-maintenance">
-        <div class="sc-top">
-          <div class="sc-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.86l-8.2 14.2A1.5 1.5 0 0 0 3.4 20.5h17.2a1.5 1.5 0 0 0 1.3-2.44l-8.2-14.2a1.5 1.5 0 0 0-2.6 0Z"/></svg>
+          <div class="panel chart-panel">
+            <div class="panel-head"><h4>Revenue by day</h4></div>
+            <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
           </div>
-          <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+          <div class="panel chart-panel">
+            <div class="panel-head"><h4>Visitors by day</h4></div>
+            <div class="chart-wrap"><canvas id="chart-visitors"></canvas></div>
+          </div>
         </div>
-        <h3>Maintenance</h3>
-        <p>A brief "we'll be right back" page. Use for short, occasional pauses.</p>
-      </button>
-    </div>
+      </section>
 
-    <!-- ═══ Sales analytics (real data from the applications table) ═══ -->
-    <p class="section-label">Sales</p>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="label">Total orders</div><div class="value skeleton" id="stat-orders-total">—</div></div>
-      <div class="stat-card"><div class="label">Orders today</div><div class="value skeleton" id="stat-orders-today">—</div></div>
-      <div class="stat-card"><div class="label">Orders this week</div><div class="value skeleton" id="stat-orders-week">—</div></div>
-      <div class="stat-card"><div class="label">Revenue (total)</div><div class="value skeleton" id="stat-revenue-total">—</div></div>
-    </div>
+      <!-- ───────────────────────── ORDERS ───────────────────────── -->
+      <section class="page" data-page-panel="orders">
+        <div class="page-head">
+          <h1>Orders</h1>
+          <p>Payment orders, linked to the matching application where available.</p>
+        </div>
 
-    <!-- ═══ Visitor analytics ═══ -->
-    <p class="section-label">Visitors</p>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="label">Total visitors</div><div class="value skeleton" id="stat-visitors-total">—</div></div>
-      <div class="stat-card"><div class="label">Visitors today</div><div class="value skeleton" id="stat-visitors-today">—</div></div>
-      <div class="stat-card"><div class="label">Visitors this week</div><div class="value skeleton" id="stat-visitors-week">—</div></div>
-      <div class="stat-card"><div class="label">Active mode</div><div class="value" id="stat-active-mode" style="font-size:1rem;">—</div></div>
-    </div>
+        <div id="orders-error" class="state-banner state-error" hidden></div>
 
-    <!-- ═══ Recent visitors table ═══ -->
-    <div class="panel">
-      <div class="panel-head"><h4>Recent visitors</h4><span id="recent-visitors-count"></span></div>
-      <table>
-        <thead><tr><th>Time</th><th>Country</th><th>Device</th><th>Browser / OS</th><th>Referrer</th><th>Landing page</th></tr></thead>
-        <tbody id="visitors-tbody">
-          <tr class="empty-row"><td colspan="6">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="filter-bar">
+          <input type="text" id="f-search" placeholder="Search order reference or email…" class="f-input" />
+          <select id="f-status" class="f-select">
+            <option value="">Payment status: all</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select id="f-app-status" class="f-select">
+            <option value="">Application status: all</option>
+          </select>
+          <select id="f-product" class="f-select">
+            <option value="">Product: all</option>
+          </select>
+          <input type="date" id="f-date-from" class="f-input f-date" title="From date" />
+          <input type="date" id="f-date-to" class="f-input f-date" title="To date" />
+          <button class="f-clear" id="f-clear">Clear</button>
+        </div>
 
-    <!-- ═══ Switch history ═══ -->
-    <div class="panel">
-      <div class="panel-head"><h4>Switch history</h4><span>Who changed the live mode, and when</span></div>
-      <table>
-        <thead><tr><th>Time</th><th>From</th><th>To</th><th>Changed by</th></tr></thead>
-        <tbody id="log-tbody">
-          <tr class="empty-row"><td colspan="4">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="panel">
+          <div class="panel-head"><h4>Orders</h4><span id="orders-count"></span></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th></th>
+                <th>Order reference</th>
+                <th>Customer email</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Website</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="orders-tbody">
+                <tr class="empty-row"><td colspan="9">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
+      <!-- ───────────────────────── VISITORS ───────────────────────── -->
+      <section class="page" data-page-panel="visitors">
+        <div class="page-head">
+          <h1>Visitors</h1>
+          <p>Real-time traffic recorded by the site.</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Total visitors</div><div class="value skeleton" id="stat-visitors-total">—</div></div>
+          <div class="stat-card"><div class="label">Visitors today</div><div class="value skeleton" id="stat-visitors-today">—</div></div>
+          <div class="stat-card"><div class="label">Visitors this week</div><div class="value skeleton" id="stat-visitors-week">—</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h4>Recent visitors</h4><span id="recent-visitors-count"></span></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Time</th><th>Country</th><th>Device</th><th>Browser / OS</th><th>Referrer</th><th>Landing page</th></tr></thead>
+              <tbody id="visitors-tbody">
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────── SITE SWITCH ───────────────────────── -->
+      <section class="page" data-page-panel="switch">
+        <div class="page-head">
+          <h1>Site Switch</h1>
+          <p>Control what every visitor sees, live.</p>
+        </div>
+
+        <!-- ═══ Signature: live status board ═══ -->
+        <div class="board">
+          <div class="board-row">
+            <div>
+              <p class="board-eyebrow">Now showing to every visitor</p>
+              <h1 class="board-mode" id="board-mode">
+                <span class="board-dot live" id="board-dot"></span>
+                <span id="board-mode-text" class="skeleton">OFFER PAGE</span>
+              </h1>
+            </div>
+            <div class="board-meta">
+              <span>Last switch: <b id="meta-last-switch">—</b></span>
+              <span>By: <b id="meta-last-by">—</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="switch-grid">
+          <button class="switch-card" data-mode="offer" id="card-offer">
+            <div class="sc-top">
+              <div class="sc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#5ee39d" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </div>
+              <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+            </div>
+            <h3>Offer Page</h3>
+            <p>The real production site — pricing, checkout, everything visitors normally see.</p>
+          </button>
+
+          <button class="switch-card" data-mode="white" id="card-white">
+            <div class="sc-top">
+              <div class="sc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ffcf5c" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h16"/></svg>
+              </div>
+              <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+            </div>
+            <h3>White Page</h3>
+            <p>A neutral, general-information version. Shown to every visitor until switched back.</p>
+          </button>
+
+          <button class="switch-card" data-mode="maintenance" id="card-maintenance">
+            <div class="sc-top">
+              <div class="sc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.86l-8.2 14.2A1.5 1.5 0 0 0 3.4 20.5h17.2a1.5 1.5 0 0 0 1.3-2.44l-8.2-14.2a1.5 1.5 0 0 0-2.6 0Z"/></svg>
+              </div>
+              <span class="live-pill" style="display:none;" data-live-pill>LIVE</span>
+            </div>
+            <h3>Maintenance</h3>
+            <p>A brief "we'll be right back" page. Use for short, occasional pauses.</p>
+          </button>
+        </div>
+
+        <div class="stat-grid" style="margin-bottom:18px;">
+          <div class="stat-card"><div class="label">Active mode</div><div class="value" id="stat-active-mode" style="font-size:1rem;">—</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h4>Switch history</h4><span>Who changed the live mode, and when</span></div>
+          <table>
+            <thead><tr><th>Time</th><th>From</th><th>To</th><th>Changed by</th></tr></thead>
+            <tbody id="log-tbody">
+              <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
   </div>
 
-  <!-- ═══ Confirmation modal ═══ -->
+  <!-- ═══ Confirmation modal (site switch) ═══ -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
       <h3 id="modal-title">Switch the live site?</h3>
@@ -129,10 +269,23 @@
     </div>
   </div>
 
+  <!-- ═══ Documents viewer modal ═══ -->
+  <div class="modal-overlay" id="docs-overlay">
+    <div class="modal modal-lg">
+      <h3>Uploaded documents</h3>
+      <p id="docs-sub">Order reference —</p>
+      <div class="docs-grid" id="docs-grid"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="docs-close" style="flex:none; padding:11px 22px;">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Toast ═══ -->
   <div class="toast" id="toast"><span class="dot"></span><span id="toast-text">Done</span></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="/supabase-config.js"></script>
   <script src="/admin/dashboard.js"></script>
 </body>
