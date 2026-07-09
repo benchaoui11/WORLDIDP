@@ -129,23 +129,18 @@
   });
 
   /* ---------- coupon ---------- */
-  const COUPONS = { WORLD10: 0.10, DRIVE15: 0.15, IDP20: 0.20 };
+  // TEMPORARY: until real payment (Stripe) is connected, coupons must never
+  // reduce the payable amount — payment_orders.amount is computed purely
+  // from product_code + express on the backend, with no discount concept
+  // yet. Applying a discount here would make the visible Total Due not
+  // match what's actually charged. state.couponPct is intentionally never
+  // set to a non-zero value below; recalc() already only shows a discount
+  // when couponPct > 0, so leaving it at 0 keeps Total Due == subtotal.
   $("[data-coupon-toggle]").addEventListener("click", () => $("[data-coupon-box]").classList.toggle("show"));
   $("[data-coupon-apply]").addEventListener("click", () => {
-    const input = $("[data-coupon-input]");
     const msg = $("[data-coupon-msg]");
-    const code = input.value.trim().toUpperCase();
-    if (COUPONS[code]) {
-      state.couponPct = COUPONS[code];
-      state.couponCode = code;
-      msg.className = "coupon-msg ok";
-      msg.textContent = `✓ ${Math.round(COUPONS[code]*100)}% off applied.`;
-    } else {
-      state.couponPct = 0; state.couponCode = "";
-      msg.className = "coupon-msg bad";
-      msg.textContent = "That code isn't valid.";
-    }
-    recalc();
+    msg.className = "coupon-msg bad";
+    msg.textContent = "Coupons will be available after secure payment is activated.";
   });
 
   /* ---------- validation ---------- */

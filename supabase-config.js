@@ -112,7 +112,22 @@ window.worldidpSubmitOrder = async function (order) {
     );
     uploaded.forEach((u) => { if (u) fileUrls[u.key] = u.path; });
 
-    // 2) Insert the order row.
+    // 2) Idempotent insert: if this ref was already submitted (e.g. the
+    //    customer retried payment after the first attempt), reuse that
+    //    existing row instead of inserting a duplicate.
+    const { data: existing, error: lookupErr } = await supabase
+      .from(cfg.TABLE)
+      .select("ref")
+      .eq("ref", ref)
+      .maybeSingle();
+    if (lookupErr) throw lookupErr;
+
+    if (existing) {
+      // Already have an application for this ref — nothing more to insert.
+      // The caller can safely continue on to payment / retry payment.
+      return { ok: true, ref, reused: true };
+    }
+
     const row = {
       ref,
       status: "submitted",
@@ -143,11 +158,20 @@ window.worldidpSubmitOrder = async function (order) {
     };
 
     const { error: insErr } = await supabase.from(cfg.TABLE).insert(row);
-    if (insErr) throw insErr;
+    if (insErr) {
+      // Race condition: another request for the same ref was inserted
+      // between our check above and this insert (e.g. a double-click or a
+      // fast retry). Treat that as success instead of a real failure —
+      // the application already exists either way.
+      const isDuplicateRef = insErr.code === "23505" || /duplicate key/i.test(insErr.message || "");
+      if (isDuplicateRef) return { ok: true, ref, reused: true };
+      throw insErr;
+    }
 
-    return { ok: true };
+    return { ok: true, ref };
   } catch (e) {
     console.error("[WorldIDP] submit failed:", e);
-    return { ok: false, error: e.message || String(e) };
+    // Never surface raw database error text to the customer.
+    return { ok: false, error: "We couldn't save your application right now. Please try again in a moment." };
   }
 };
