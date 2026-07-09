@@ -370,7 +370,7 @@
               <div><div class="dk">Application status</div><div class="dv">${app ? `<span class="status-pill ${app.status}">${app.status}</span>` : '—'}</div></div>
               <div><div class="dk">Payment status</div><div class="dv"><span class="status-pill ${o.status}">${o.status}</span></div></div>
               <div><div class="dk">Fast Processing</div><div class="dv">${o.metadata?.fast_processing ? 'Yes' : 'No'}</div></div>
-              <div><div class="dk">Shipping</div><div class="dv">${o.metadata?.shipping === 'free' ? 'Free' : (o.metadata?.shipping || 'Free')} · ${o.metadata?.shipping_eta || '14-25 working days'}</div></div>
+              <div><div class="dk">Shipping</div><div class="dv">${(o.product_code || '').startsWith('digital_') ? '—' : `${o.metadata?.shipping === 'free' ? 'Free' : (o.metadata?.shipping || 'Free')} · ${o.metadata?.shipping_eta || '14-25 working days'}`}</div></div>
             </div>
             <button class="view-docs-btn" data-docs="${rowId}" ${app ? '' : 'disabled title="No linked application found"'}>View Documents</button>
           </td>
