@@ -4,6 +4,19 @@
 (() => {
   "use strict";
 
+  // Checkout is the true start of a new order. Clear any leftover
+  // per-order state from a previous application BEFORE anything below
+  // reads or generates a ref, so a customer starting a fresh order never
+  // inherits a stale application ref (or stale saved photos/info) from an
+  // earlier order in the same browser session. Retries that stay on the
+  // upload/payment page — never revisiting checkout.html — are
+  // unaffected, since they don't re-run this.
+  try {
+    sessionStorage.removeItem("worldidp_ref");
+    sessionStorage.removeItem("worldidp_application");
+    sessionStorage.removeItem("worldidp_files");
+  } catch (e) { /* sessionStorage may be unavailable */ }
+
   /* ---------- helpers ---------- */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
