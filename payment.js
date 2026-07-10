@@ -162,17 +162,6 @@
       try { sessionStorage.setItem("worldidp_ref", ref); } catch(e){} }
     return ref;
   }
-  // A brand-new reference for EVERY Pay attempt — intentionally never
-  // persisted/reused. getRef() above stays stable across the whole
-  // session (that's the application ref, correctly reused so we never
-  // duplicate the applications row); this one must be fresh each time so
-  // a retry — or testing a different plan in the same session — always
-  // creates its own payment_orders row instead of colliding with, and
-  // silently reusing, a previous attempt's order (which used to return
-  // stale product_code/amount from an unrelated earlier order).
-  function getFreshOrderRef() {
-    return "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-  }
   function getFiles() { try { return JSON.parse(sessionStorage.getItem("worldidp_files") || "{}"); } catch(e){ return {}; } }
 
   function showError(msg) {
@@ -184,25 +173,6 @@
       '<button type="button" id="err-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Try again</button>';
     card.querySelector("#err-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
   }
-  function showDemoNotice(ref, productCode) {
-    const card = overlay.querySelector(".po-card");
-    card.innerHTML =
-      '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#1c3da0,#4f86ff);color:#fff;">' +
-      '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 11h20M6 15h4"/></svg></div>' +
-      '<h3>Payment isn\'t connected yet</h3><p style="margin-top:2px">This order (<b>'+productCode+'</b>) has been prepared but payment processing isn\'t live yet. Order reference: <b>'+ref+'</b>.</p>' +
-      '<button type="button" id="demo-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
-    card.querySelector("#demo-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
-  }
-  function showTestSuccessNotice(ref) {
-    const card = overlay.querySelector(".po-card");
-    card.innerHTML =
-      '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#15a06b,#1fc285);color:#fff;">' +
-      '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
-      '<h3>Test payment order created successfully.</h3><p style="margin-top:2px">Order reference: <b>'+ref+'</b>.</p>' +
-      '<button type="button" id="test-ok-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
-    card.querySelector("#test-ok-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
-  }
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validate()) {
@@ -240,32 +210,13 @@
       files: getFiles(),
     };
 
-    // 1) Save to Supabase (images already captured on the upload step).
+    // Save the full application (details + documents) to Supabase.
+    // No payment is collected here — the team reviews the documents first
+    // and sends secure payment instructions afterward.
     const res = await window.worldidpSubmitOrder(payload);
     if (!res.ok) { showError(res.error); return; }
 
-    // 2) Hand off to the payment service — TEST MODE call to create-checkout.
-    // orderRef is fresh for THIS attempt; ref (the application ref) rides
-    // along in metadata.application_id so admin can still link the two.
-    const orderRef = getFreshOrderRef();
-    const paymentPayload = window.WorldIDPPayment.buildTestCheckoutPayload({
-      format: order.format,
-      validYears: order.validYears,
-      express: state.express,
-      email: order.email,
-      orderReference: orderRef,
-      applicationId: ref,
-    });
-    console.log("PAYMENT_PAYLOAD", paymentPayload);
-    const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
-
-    if (result.ok && result.data?.checkout_url) {
-      window.location.href = result.data.checkout_url;
-    } else if (result.ok) {
-      showTestSuccessNotice(orderRef); // fallback: no checkout_url in the response
-    } else {
-      showDemoNotice(orderRef, paymentPayload.product_code);
-    }
+    window.location.href = "thank-you.html?ref=" + encodeURIComponent(ref);
   });
 
   /* ---------- header scroll ---------- */

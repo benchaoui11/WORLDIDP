@@ -37,6 +37,7 @@
     { "source": "/faq.html", "destination": "/api/gate" },
     { "source": "/track-order.html", "destination": "/api/gate" },
     { "source": "/upload-photos.html", "destination": "/api/gate" },
+    { "source": "/thank-you.html", "destination": "/api/gate" },
 
     { "source": "/apply", "destination": "/api/gate" },
     { "source": "/apply/(.*)", "destination": "/api/gate" }

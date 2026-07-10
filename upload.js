@@ -372,53 +372,6 @@
   // A brand-new reference for EVERY Pay attempt — intentionally never
   // persisted/reused. getOrder().ref above stays stable across the whole
   // session (the application ref, correctly reused so we never duplicate
-  // the applications row); this one must be fresh each time so a retry —
-  // or testing a different plan in the same session — always creates its
-  // own payment_orders row instead of colliding with a previous attempt.
-  function getFreshOrderRef() {
-    return "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-  }
-
-  function showDemoNotice(order, productCode) {
-    const card = overlay.querySelector(".po-card");
-    if (card) {
-      card.innerHTML =
-        '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;' +
-        'background:linear-gradient(135deg,#1c3da0,#4f86ff);color:#fff;">' +
-        '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" ' +
-        'stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/>' +
-        '<path d="M2 11h20M6 15h4"/></svg></div>' +
-        '<h3>Payment isn\'t connected yet</h3>' +
-        '<p style="margin-top:2px">This order (<b>' + productCode + '</b>) has been prepared but payment processing ' +
-        'isn\'t live yet. Your order reference is <b>' + order.ref + '</b>.</p>' +
-        '<button type="button" id="demo-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;' +
-        'padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
-      card.querySelector("#demo-close")?.addEventListener("click", () => {
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-      });
-    }
-  }
-
-  function showTestSuccessNotice(order) {
-    const card = overlay.querySelector(".po-card");
-    if (card) {
-      card.innerHTML =
-        '<div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;' +
-        'background:linear-gradient(135deg,#15a06b,#1fc285);color:#fff;">' +
-        '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-        'stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
-        '<h3>Test payment order created successfully.</h3>' +
-        '<p style="margin-top:2px">Order reference: <b>' + order.ref + '</b>.</p>' +
-        '<button type="button" id="test-ok-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;' +
-        'padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Got it</button>';
-      card.querySelector("#test-ok-close")?.addEventListener("click", () => {
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-      });
-    }
-  }
-
   // Collect the captured images + signature as data URLs.
   function collectFiles() {
     const get = (sel) => { const el = $(sel); return el && el.src && el.src.startsWith("data:") ? el.src : null; };
@@ -536,27 +489,13 @@
       files,
     });
 
+    // Save the full application (details + documents) to Supabase.
+    // No payment is collected here — the team reviews the documents first
+    // and sends secure payment instructions afterward.
     const res = await window.worldidpSubmitOrder(full);
     if (!res.ok) { showError(res.error); return; }
 
-    const paymentPayload = window.WorldIDPPayment.buildTestCheckoutPayload({
-      format: order.format,
-      validYears: order.validYears,
-      express: addonState.express, // Fast Processing — customer must manually enable it (see the addon section above)
-      email: order.email,
-      orderReference: getFreshOrderRef(),
-      applicationId: order.ref,
-    });
-    console.log("PAYMENT_PAYLOAD", paymentPayload);
-    const result = await window.WorldIDPPayment.createTestPaymentOrder(paymentPayload);
-
-    if (result.ok && result.data?.checkout_url) {
-      window.location.href = result.data.checkout_url;
-    } else if (result.ok) {
-      showTestSuccessNotice({ ref: paymentPayload.metadata.order_reference }); // fallback: no checkout_url in the response
-    } else {
-      showDemoNotice({ ref: paymentPayload.metadata.order_reference }, paymentPayload.product_code);
-    }
+    window.location.href = "thank-you.html?ref=" + encodeURIComponent(order.ref || "");
   });
 
   function computeTotal(format, years) {

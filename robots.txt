@@ -8,5 +8,6 @@ Disallow: /api/
 Disallow: /checkout.html
 Disallow: /payment.html
 Disallow: /upload-photos.html
+Disallow: /thank-you.html
 
 Sitemap: https://worldidp.com/sitemap.xml

@@ -105,6 +105,7 @@ const PAGES = {
   '/faq.html':                             { offer: '_offer/faq.html',            white: null },
   '/track-order.html':                     { offer: '_offer/track-order.html',    white: null },
   '/upload-photos.html':                   { offer: '_offer/upload-photos.html',  white: null },
+  '/thank-you.html':                       { offer: '_offer/thank-you.html',      white: null },
 };
 
 const MAINTENANCE_HTML = `<!doctype html>
