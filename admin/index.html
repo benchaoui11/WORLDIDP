@@ -28,7 +28,7 @@
         </button>
         <button class="side-link" data-page="orders">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
-          <span>Orders</span>
+          <span>Applications</span>
         </button>
         <button class="side-link" data-page="visitors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -52,7 +52,7 @@
       <section class="page is-active" data-page-panel="overview">
         <div class="page-head">
           <h1>Overview</h1>
-          <p>A snapshot of applications, orders and traffic.</p>
+          <p>A snapshot of applications and traffic.</p>
         </div>
 
         <div id="overview-error" class="state-banner state-error" hidden></div>
@@ -60,19 +60,16 @@
         <p class="section-label">Applications</p>
         <div class="stat-grid">
           <div class="stat-card"><div class="label">Total applications</div><div class="value skeleton" id="ov-app-total">—</div></div>
-          <div class="stat-card"><div class="label">Pending</div><div class="value skeleton" id="ov-app-pending">—</div></div>
+          <div class="stat-card"><div class="label">Pending review</div><div class="value skeleton" id="ov-app-pending">—</div></div>
           <div class="stat-card"><div class="label">Completed</div><div class="value skeleton" id="ov-app-completed">—</div></div>
+          <div class="stat-card"><div class="label">Submitted value</div><div class="value skeleton" id="ov-app-value">—</div></div>
+        </div>
+        <p class="hint-note">Submitted value is the total price of all applications received — not confirmed payment. No payment is collected automatically; the team reviews documents and sends payment instructions manually.</p>
+
+        <p class="section-label">Traffic</p>
+        <div class="stat-grid">
           <div class="stat-card"><div class="label">Visitors (total)</div><div class="value skeleton" id="ov-visitors-total">—</div></div>
         </div>
-
-        <p class="section-label">Payment orders</p>
-        <div class="stat-grid">
-          <div class="stat-card"><div class="label">Total orders</div><div class="value skeleton" id="ov-orders-total">—</div></div>
-          <div class="stat-card"><div class="label">Pending</div><div class="value skeleton" id="ov-orders-pending">—</div></div>
-          <div class="stat-card"><div class="label">Paid</div><div class="value skeleton" id="ov-orders-paid">—</div></div>
-          <div class="stat-card"><div class="label">Revenue (paid)</div><div class="value skeleton" id="ov-revenue-total">—</div></div>
-        </div>
-        <p class="hint-note" id="ov-revenue-hint" hidden>Revenue only counts orders with status "paid". Since payment confirmation isn't wired up yet, this will read $0 until that's connected.</p>
       </section>
 
       <!-- ───────────────────────── ANALYTICS ───────────────────────── -->
@@ -88,11 +85,7 @@
             <div class="chart-wrap"><canvas id="chart-applications"></canvas></div>
           </div>
           <div class="panel chart-panel">
-            <div class="panel-head"><h4>Orders by day</h4></div>
-            <div class="chart-wrap"><canvas id="chart-orders"></canvas></div>
-          </div>
-          <div class="panel chart-panel">
-            <div class="panel-head"><h4>Revenue by day</h4></div>
+            <div class="panel-head"><h4>Submitted value by day</h4></div>
             <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
           </div>
           <div class="panel chart-panel">
@@ -102,29 +95,22 @@
         </div>
       </section>
 
-      <!-- ───────────────────────── ORDERS ───────────────────────── -->
+      <!-- ───────────────────────── APPLICATIONS ───────────────────────── -->
       <section class="page" data-page-panel="orders">
         <div class="page-head">
-          <h1>Orders</h1>
-          <p>Payment orders, linked to the matching application where available.</p>
+          <h1>Applications</h1>
+          <p>Every submitted application, with its documents.</p>
         </div>
 
         <div id="orders-error" class="state-banner state-error" hidden></div>
 
         <div class="filter-bar">
           <input type="text" id="f-search" placeholder="Search order reference or email…" class="f-input" />
-          <select id="f-status" class="f-select">
-            <option value="">Payment status: all</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="failed">Failed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
           <select id="f-app-status" class="f-select">
             <option value="">Application status: all</option>
           </select>
           <select id="f-product" class="f-select">
-            <option value="">Product: all</option>
+            <option value="">Package: all</option>
           </select>
           <input type="date" id="f-date-from" class="f-input f-date" title="From date" />
           <input type="date" id="f-date-to" class="f-input f-date" title="To date" />
@@ -132,22 +118,21 @@
         </div>
 
         <div class="panel">
-          <div class="panel-head"><h4>Orders</h4><span id="orders-count"></span></div>
+          <div class="panel-head"><h4>Applications</h4><span id="orders-count"></span></div>
           <div class="table-scroll">
             <table>
               <thead><tr>
                 <th></th>
-                <th>Order reference</th>
+                <th>Reference</th>
                 <th>Customer email</th>
-                <th>Product</th>
-                <th>Amount</th>
+                <th>Package</th>
+                <th>Value</th>
                 <th>Status</th>
-                <th>Created</th>
-                <th>Website</th>
+                <th>Submitted</th>
                 <th></th>
               </tr></thead>
               <tbody id="orders-tbody">
-                <tr class="empty-row"><td colspan="9">Loading…</td></tr>
+                <tr class="empty-row"><td colspan="8">Loading…</td></tr>
               </tbody>
             </table>
           </div>
