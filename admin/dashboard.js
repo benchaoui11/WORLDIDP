@@ -212,9 +212,9 @@
   }
 
   function packageLabel(a) {
-    const fmt = a.format === 'physical' ? 'Print + Digital' : 'Digital';
-    const yrs = a.validity_years ? `${a.validity_years}yr` : '';
-    return [fmt, yrs].filter(Boolean).join(' · ');
+    const fmt = a.format === 'physical' ? 'Print + Digital' : 'Digital Only';
+    const yrs = a.validity_years ? `${a.validity_years} Year${a.validity_years > 1 ? 's' : ''}` : '';
+    return [fmt, yrs].filter(Boolean).join(' — ');
   }
 
   async function loadCoreData() {
@@ -235,6 +235,7 @@
     renderOverview();
     renderOrdersFilters();
     renderOrders();
+    renderPaidOrders();
     if (document.querySelector('.page.is-active')?.dataset.pagePanel === 'analytics') {
       renderCharts();
       chartsRendered = true;
@@ -245,7 +246,7 @@
   function renderOverview() {
     const totalApps = _applications.length;
     const completedApps = _applications.filter((a) => (a.status || '').toLowerCase() === 'completed').length;
-    const pendingApps = totalApps - completedApps;
+    const pendingApps = _applications.filter((a) => ['submitted', 'reviewing'].includes((a.status || '').toLowerCase())).length;
     const totalValue = _applications.reduce((sum, a) => sum + (Number(a.total) || 0), 0);
 
     setStat('ov-app-total', totalApps.toLocaleString());
@@ -333,13 +334,22 @@
               <div><div class="dk">Destination country</div><div class="dv">${a.destination_country || '—'}</div></div>
               <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
               ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
+              <div>
+                <div class="dk">Status</div>
+                <div class="dv" style="display:flex; align-items:center;">
+                  <select class="status-select" data-status-select="${rowId}" data-ref="${a.ref}">
+                    ${['submitted','reviewing','paid','completed','rejected'].map((s) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
+                  </select>
+                  <span class="status-save-hint" data-status-hint="${rowId}">Saved</span>
+                </div>
+              </div>
             </div>
             <button class="view-docs-btn" data-docs="${rowId}">View Documents</button>
           </td>
         </tr>`;
     }).join('');
 
-    // Wire expand toggles + docs buttons for this render pass.
+    // Wire expand toggles + docs buttons + status changes for this render pass.
     rows.forEach((a, i) => {
       const rowId = 'ord-' + i;
       const btn = tbody.querySelector(`[data-expand="${rowId}"]`);
@@ -353,6 +363,89 @@
       if (docsBtn) {
         docsBtn.addEventListener('click', () => openDocsModal(a, a.ref));
       }
+      const statusSelect = tbody.querySelector(`[data-status-select="${rowId}"]`);
+      if (statusSelect) {
+        statusSelect.addEventListener('change', () => updateApplicationStatus(a, statusSelect.value, rowId));
+      }
+    });
+  }
+
+  // ─────────────────── Change an application's status ───────────────────
+  async function updateApplicationStatus(app, newStatus, rowId) {
+    const hint = document.querySelector(`[data-status-hint="${rowId}"]`);
+    const { error } = await client.from('applications').update({ status: newStatus }).eq('ref', app.ref);
+
+    if (error) {
+      console.error('[update status]', error);
+      if (hint) { hint.textContent = 'Failed to save'; hint.className = 'status-save-hint show err'; }
+      showToast('Could not update status: ' + error.message, true);
+      return;
+    }
+
+    app.status = newStatus; // keep local cache in sync
+    if (hint) {
+      hint.textContent = 'Saved';
+      hint.className = 'status-save-hint show ok';
+      setTimeout(() => hint.classList.remove('show'), 1800);
+    }
+    showToast(`${app.ref} marked as ${newStatus}`);
+    renderOverview();
+    renderPaidOrders();
+  }
+
+  // ─────────────────── Orders page: applications marked paid/completed ───────────────────
+  function renderPaidOrders() {
+    const tbody = document.getElementById('paid-orders-tbody');
+    if (!tbody) return;
+    const rows = _applications.filter((a) => a.status === 'paid' || a.status === 'completed');
+    document.getElementById('paid-orders-count').textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's');
+
+    if (!_coreDataReady) return;
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No paid orders yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map((a, i) => {
+      const rowId = 'po-' + i;
+      const name = [a.first_name, a.last_name].filter(Boolean).join(' ');
+      const address = [a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', ');
+      return `
+        <tr>
+          <td><button class="row-expand-btn" data-expand="${rowId}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
+          <td class="mono-cell">${a.ref}</td>
+          <td>${a.email || '—'}</td>
+          <td class="mono-cell">${packageLabel(a)}</td>
+          <td>$${Number(a.total || 0).toLocaleString()}</td>
+          <td><span class="status-pill ${a.status}">${a.status}</span></td>
+          <td class="mono-cell">${timeAgo(a.created_at)}</td>
+          <td></td>
+        </tr>
+        <tr class="detail-row" id="${rowId}" style="display:none;">
+          <td colspan="8">
+            <div class="detail-grid">
+              <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
+              <div><div class="dk">Phone</div><div class="dv">${a.phone || '—'}</div></div>
+              <div><div class="dk">Destination country</div><div class="dv">${a.destination_country || '—'}</div></div>
+              <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
+              ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
+            </div>
+            <button class="view-docs-btn" data-docs="${rowId}">View Documents</button>
+          </td>
+        </tr>`;
+    }).join('');
+
+    rows.forEach((a, i) => {
+      const rowId = 'po-' + i;
+      const btn = tbody.querySelector(`[data-expand="${rowId}"]`);
+      const detail = document.getElementById(rowId);
+      btn.addEventListener('click', () => {
+        const open = detail.style.display !== 'none';
+        detail.style.display = open ? 'none' : '';
+        btn.classList.toggle('is-open', !open);
+      });
+      const docsBtn = tbody.querySelector(`[data-docs="${rowId}"]`);
+      if (docsBtn) docsBtn.addEventListener('click', () => openDocsModal(a, a.ref));
     });
   }
 

@@ -106,3 +106,13 @@ create policy "admins read applications"
 -- (insert policy for anon during checkout should already exist from your
 --  original setup — do not remove it. This script only ADDS the admin-read
 --  policy; it does not touch existing insert policies.)
+
+-- Allow the admin dashboard to UPDATE an application's status
+-- (e.g. marking it "paid" once the customer has completed payment
+-- outside the site). Still restricted to authenticated (admin) users only.
+drop policy if exists "admins update applications" on public.applications;
+create policy "admins update applications"
+  on public.applications for update
+  to authenticated
+  using (true)
+  with check (true);

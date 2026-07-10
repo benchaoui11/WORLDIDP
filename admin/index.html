@@ -30,6 +30,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
           <span>Applications</span>
         </button>
+        <button class="side-link" data-page="paid-orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+          <span>Orders</span>
+        </button>
         <button class="side-link" data-page="visitors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Visitors</span>
@@ -59,16 +63,34 @@
 
         <p class="section-label">Applications</p>
         <div class="stat-grid">
-          <div class="stat-card"><div class="label">Total applications</div><div class="value skeleton" id="ov-app-total">—</div></div>
-          <div class="stat-card"><div class="label">Pending review</div><div class="value skeleton" id="ov-app-pending">—</div></div>
-          <div class="stat-card"><div class="label">Completed</div><div class="value skeleton" id="ov-app-completed">—</div></div>
-          <div class="stat-card"><div class="label">Submitted value</div><div class="value skeleton" id="ov-app-value">—</div></div>
+          <div class="stat-card">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 11h2"/></svg></div>
+            <div class="label">Total applications</div><div class="value skeleton" id="ov-app-total">—</div>
+          </div>
+          <div class="stat-card tone-neutral">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="label">Pending review</div><div class="value skeleton" id="ov-app-pending">—</div>
+          </div>
+          <div class="stat-card tone-live">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="label">Completed</div><div class="value skeleton" id="ov-app-completed">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="label">Submitted value</div><div class="value skeleton" id="ov-app-value">—</div>
+          </div>
         </div>
-        <p class="hint-note">Submitted value is the total price of all applications received — not confirmed payment. No payment is collected automatically; the team reviews documents and sends payment instructions manually.</p>
+        <div class="info-banner">
+          <div class="ib-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg></div>
+          <p><b>Submitted value</b> is the total price of all applications received — not confirmed payment. No payment is collected automatically; the team reviews documents and sends payment instructions manually.</p>
+        </div>
 
         <p class="section-label">Traffic</p>
         <div class="stat-grid">
-          <div class="stat-card"><div class="label">Visitors (total)</div><div class="value skeleton" id="ov-visitors-total">—</div></div>
+          <div class="stat-card">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="label">Visitors (total)</div><div class="value skeleton" id="ov-visitors-total">—</div>
+          </div>
         </div>
       </section>
 
@@ -80,15 +102,15 @@
         </div>
         <div id="analytics-error" class="state-banner state-error" hidden></div>
         <div class="chart-grid">
-          <div class="panel chart-panel">
+          <div class="panel chart-panel" data-tone="brand">
             <div class="panel-head"><h4>Applications by day</h4></div>
             <div class="chart-wrap"><canvas id="chart-applications"></canvas></div>
           </div>
-          <div class="panel chart-panel">
+          <div class="panel chart-panel" data-tone="live">
             <div class="panel-head"><h4>Submitted value by day</h4></div>
             <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
           </div>
-          <div class="panel chart-panel">
+          <div class="panel chart-panel" data-tone="muted">
             <div class="panel-head"><h4>Visitors by day</h4></div>
             <div class="chart-wrap"><canvas id="chart-visitors"></canvas></div>
           </div>
@@ -132,6 +154,35 @@
                 <th></th>
               </tr></thead>
               <tbody id="orders-tbody">
+                <tr class="empty-row"><td colspan="8">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────── PAID ORDERS ───────────────────────── -->
+      <section class="page" data-page-panel="paid-orders">
+        <div class="page-head">
+          <h1>Orders</h1>
+          <p>Applications marked as paid or completed.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h4>Orders</h4><span id="paid-orders-count"></span></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th></th>
+                <th>Reference</th>
+                <th>Customer email</th>
+                <th>Package</th>
+                <th>Value</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="paid-orders-tbody">
                 <tr class="empty-row"><td colspan="8">Loading…</td></tr>
               </tbody>
             </table>
