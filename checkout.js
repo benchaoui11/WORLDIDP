@@ -172,7 +172,27 @@
     sumValid.textContent = `${state.validYears}-year validity · Expires ${state.validUntil}`;
     sumBase.textContent = `$${was}`;
     sumDisc.textContent = `−$${disc}`;
-    sumTotal.textContent = total;
+
+    let grandTotal = total;
+
+    // Travel companion — 20% off the same package, added as a second summary line.
+    if (companionAdded) {
+      const compPrice = companionPriceFor(state.format, state.validYears);
+      const compSavings = total - compPrice;
+      const compName = compFirstEl.value.trim() ? `${compFirstEl.value.trim()}'s IDP` : "Travel companion";
+      $("[data-sum-comp-name]").textContent = compName;
+      $("[data-sum-comp-save]").textContent = `You saved $${compSavings}`;
+      $("[data-sum-comp-total]").textContent = `$${compPrice}`;
+      sumCompLine.hidden = false;
+      grandTotal += compPrice;
+
+      const pkgLabel = `${info.sumName.replace(" IDP", "")}, ${state.validYears}-year`;
+      $$("[data-comp-package]").forEach((el) => { el.textContent = pkgLabel; });
+    } else {
+      sumCompLine.hidden = true;
+    }
+
+    sumTotal.textContent = grandTotal;
 
     // plan card now-prices reflect validity
     $$(".plan").forEach((p) => {
@@ -248,6 +268,42 @@
   /* ---------- name -> preview (live typing) ---------- */
   const firstEl = $("#first-name");
   const lastEl  = $("#last-name");
+
+  /* ---------- travel companion ---------- */
+  const compInvite   = $("#companion-invite");
+  const compPanel    = $("#companion-panel");
+  const compAddBtn   = $("#companion-add-btn");
+  const compRemoveBtn= $("#companion-remove-btn");
+  const compFirstEl  = $("#comp-first-name");
+  const compLastEl   = $("#comp-last-name");
+  const compEmailEl  = $("#comp-email");
+  const compCategoryEl = $("#comp-category");
+  const sumCompLine  = $("#sum-companion-line");
+  let companionAdded = false;
+
+  function companionPriceFor(format, years) {
+    return Math.round(priceFor(format, years) * 0.8);
+  }
+
+  compAddBtn.addEventListener("click", () => {
+    companionAdded = true;
+    compInvite.hidden = true;
+    compPanel.hidden = false;
+    recalc();
+    compFirstEl.focus({ preventScroll: true });
+    compPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  compRemoveBtn.addEventListener("click", () => {
+    companionAdded = false;
+    compPanel.hidden = true;
+    compInvite.hidden = false;
+    [compFirstEl, compLastEl, compEmailEl].forEach((el) => { el.value = ""; el.classList.remove("invalid"); el.closest(".field")?.classList.remove("show-err"); });
+    compCategoryEl.value = "B";
+    recalc();
+  });
+
+  compFirstEl.addEventListener("input", recalc);
   function updateName() {
     const first = firstEl.value.trim();
     const last  = lastEl.value.trim();
@@ -323,6 +379,14 @@
       const el = $("#" + id);
       ok = markField(el, !!el.value) && ok;
     });
+
+    // Travel companion — only validated if the customer chose to add one.
+    if (companionAdded) {
+      ok = markField(compFirstEl, compFirstEl.value.trim().length > 0) && ok;
+      ok = markField(compLastEl, compLastEl.value.trim().length > 0) && ok;
+      const compEmailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(compEmailEl.value.trim());
+      ok = markField(compEmailEl, compEmailOk) && ok;
+    }
     return ok;
   }
 
@@ -347,6 +411,11 @@
       firstBad?.focus({ preventScroll: true });
       return;
     }
+
+    const submitBtn = $("#submit-btn");
+    if (submitBtn?.disabled) return; // already submitting — ignore repeat clicks
+    if (submitBtn) submitBtn.disabled = true;
+
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden", "false");
     // Persist a light summary so step 2 can show the order context.
@@ -363,12 +432,32 @@
         phone: $("#phone").value.trim(),
       };
       sessionStorage.setItem("worldidp_application", JSON.stringify(summary));
+
+      // Travel companion — same trip, same package, their own info + documents.
+      if (companionAdded) {
+        const companion = {
+          firstName: compFirstEl.value.trim(),
+          lastName: compLastEl.value.trim(),
+          email: compEmailEl.value.trim(),
+          category: compCategoryEl.value,
+          format: state.format,
+          validYears: state.validYears,
+          validUntil: state.validUntil,
+          country: state.country,
+          total: companionPriceFor(state.format, state.validYears),
+        };
+        sessionStorage.setItem("worldidp_companion", JSON.stringify(companion));
+      } else {
+        sessionStorage.removeItem("worldidp_companion");
+      }
     } catch (err) { /* sessionStorage may be unavailable */ }
 
     const params = new URLSearchParams();
     params.set("format", state.format);
     params.set("valid", String(state.validYears));
     if (state.country) params.set("country", state.country);
+    params.set("person", "1");
+    if (companionAdded) params.set("party", "2");
     setTimeout(() => {
       window.location.href = "upload-photos.html?" + params.toString();
     }, 1100);

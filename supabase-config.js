@@ -150,6 +150,10 @@ window.worldidpSubmitOrder = async function (order) {
       shipping_method: order.shippingMethod || null,
       vip_processing: !!order.express, // DB column name kept as-is; renaming it needs a migration, out of scope here
       coupon: order.coupon || null,
+      // Travel companion linking — both null/false for a normal single-driver
+      // order, so existing behavior is completely unchanged.
+      group_ref: order.groupRef || null,
+      is_companion: !!order.isCompanion,
       // file paths in storage
       file_selfie: fileUrls.selfie || null,
       file_license_front: fileUrls.front || null,

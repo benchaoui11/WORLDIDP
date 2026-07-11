@@ -418,6 +418,8 @@
       'padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Try again</button>';
     card.querySelector("#err-close")?.addEventListener("click", () => {
       overlay.classList.remove("show"); overlay.setAttribute("aria-hidden", "true");
+      const btn = $("#continue-btn");
+      if (btn) btn.disabled = false; // let the customer retry
     });
   }
 
@@ -453,10 +455,44 @@
     return { selfie, front, back, signature: files.signature };
   }
 
+  // Reset every capture slot back to empty — used when handing off from the
+  // primary applicant's documents to their travel companion's, reusing this
+  // same page and flow for a second, focused pass.
+  function resetCaptureUI() {
+    ["selfie", "front", "back"].forEach((key) => {
+      const zone = $(`[data-dropzone="${key}"]`);
+      const input = $(`[data-input="${key}"]`, zone);
+      if (zone) zone.classList.remove("has-file");
+      if (input) input.value = "";
+      done[key] = false;
+    });
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasInk = false;
+    wrap.classList.remove("has-ink");
+    if (typeInput) typeInput.value = "";
+    if (typedPreview) {
+      typedPreview.textContent = "Your signature will appear here";
+      typedPreview.classList.add("placeholder");
+    }
+    done.signature = false;
+
+    refresh();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   $("#continue-btn").addEventListener("click", async () => {
     if (!KEYS.every(k => done[k])) { flagMissing(); return; }
 
+    const btn = $("#continue-btn");
+    if (btn.disabled) return; // already submitting — ignore repeat clicks
+    btn.disabled = true;
+
     const order = getOrder();
+    const urlParams = new URLSearchParams(location.search);
+    const isCompanionStep = urlParams.get("person") === "2";
+    let hasCompanion = false;
+    try { hasCompanion = !!sessionStorage.getItem("worldidp_companion"); } catch (e) {}
 
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden", "false");
@@ -464,12 +500,26 @@
     // Compress photos (resize + JPEG) BEFORE storing/uploading — much faster on mobile
     const files = await compressFiles(collectFiles());
 
-    // Persist files + order context for the payment step (physical) or for retry.
+    // Save under the right key for whoever we just captured documents for.
+    const filesKey = isCompanionStep ? "worldidp_files_companion" : "worldidp_files";
     try {
-      sessionStorage.setItem("worldidp_files", JSON.stringify(files));
+      sessionStorage.setItem(filesKey, JSON.stringify(files));
     } catch (e) { /* storage may be full for large images; handled below */ }
 
+    // Travel companion, step 1 done — hand off to their own document capture
+    // using this exact same page and flow, just for the second person.
+    if (!isCompanionStep && hasCompanion) {
+      resetCaptureUI();
+      const params = new URLSearchParams(location.search);
+      params.set("person", "2");
+      setTimeout(() => {
+        window.location.href = "upload-photos.html?" + params.toString();
+      }, 300);
+      return;
+    }
+
     const params = new URLSearchParams(location.search);
+    params.delete("person");
 
     /* ---- PRINT + DIGITAL: go to the delivery/payment page ---- */
     if (order.format === "physical") {
@@ -479,14 +529,17 @@
       return;
     }
 
-    /* ---- DIGITAL ONLY: upload now, then hand off to the payment service ---- */
+    /* ---- DIGITAL ONLY: submit now (primary + companion, if any), then confirm ---- */
     const saved = (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch (e) { return {}; } })();
+    const primaryFiles = isCompanionStep
+      ? (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_files") || "{}"); } catch (e) { return {}; } })()
+      : files;
     const full = Object.assign({}, order, {
       firstName: saved.firstName, lastName: saved.lastName, email: saved.email,
       phone: saved.phone, category: saved.category,
       total: computeTotal(order.format, order.validYears) + (addonState.express ? 14 : 0), currency: "USD",
-      express: addonState.express, // was missing entirely — this is why applications.vip_processing stayed false
-      files,
+      express: addonState.express,
+      files: primaryFiles,
     });
 
     // Save the full application (details + documents) to Supabase.
@@ -495,7 +548,36 @@
     const res = await window.worldidpSubmitOrder(full);
     if (!res.ok) { showError(res.error); return; }
 
-    window.location.href = "thank-you.html?ref=" + encodeURIComponent(order.ref || "");
+    const refs = [order.ref];
+    if (hasCompanion) {
+      try {
+        const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
+        const compFiles = JSON.parse(sessionStorage.getItem("worldidp_files_companion") || "null");
+        if (companion && compFiles) {
+          const companionRef = order.ref + "-2";
+          const compRes = await window.worldidpSubmitOrder({
+            ref: companionRef,
+            format: companion.format, validYears: companion.validYears, country: companion.country,
+            total: companion.total, currency: "USD",
+            firstName: companion.firstName, lastName: companion.lastName, email: companion.email,
+            category: companion.category,
+            express: addonState.express, // same order, same processing speed
+            files: compFiles,
+            groupRef: order.ref, isCompanion: true,
+          });
+          if (compRes.ok) {
+            refs.push(companionRef);
+          } else {
+            // Your application saved fine, but your companion's did not —
+            // don't silently show "success" when only half the order went through.
+            showError("Your application was saved, but we couldn't save your travel companion's — please try Continue again.");
+            return;
+          }
+        }
+      } catch (e) { console.error("[WorldIDP] companion submit failed:", e); }
+    }
+
+    window.location.href = "thank-you.html?ref=" + encodeURIComponent(refs.join(","));
   });
 
   function computeTotal(format, years) {
@@ -518,4 +600,30 @@
 
   /* ---------- init ---------- */
   refresh();
+
+  // Travel companion — show a clear "who's turn is it" banner when this
+  // order includes a second driver, so it's never ambiguous whose
+  // documents are currently being uploaded.
+  (function initPersonBanner() {
+    const banner = $("#person-banner");
+    if (!banner) return;
+    const isCompanionStep = new URLSearchParams(location.search).get("person") === "2";
+    let companion = null, primary = null;
+    try { companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null"); } catch (e) {}
+    try { primary = JSON.parse(sessionStorage.getItem("worldidp_application") || "null"); } catch (e) {}
+
+    if (isCompanionStep && companion) {
+      banner.hidden = false;
+      banner.classList.add("is-companion");
+      $("#pb-avatar").textContent = "2";
+      $("#pb-name").textContent = companion.firstName ? `${companion.firstName}'s IDP` : "your travel companion";
+      $("#pb-step").textContent = "step 2 of 2 — almost done";
+    } else if (!isCompanionStep && companion) {
+      banner.hidden = false;
+      banner.classList.remove("is-companion");
+      $("#pb-avatar").textContent = "1";
+      $("#pb-name").textContent = primary?.firstName ? `${primary.firstName}, that's you` : "you, first";
+      $("#pb-step").textContent = `then ${companion.firstName || "your companion"}'s documents`;
+    }
+  })();
 })();

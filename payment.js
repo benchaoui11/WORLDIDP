@@ -171,7 +171,11 @@
       '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>' +
       '<h3>Something went wrong</h3><p style="margin-top:2px">' + (msg || "Please try again.") + '</p>' +
       '<button type="button" id="err-close" style="margin-top:14px;border:0;border-radius:12px;cursor:pointer;padding:11px 20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1c3da0,#3168f3);">Try again</button>';
-    card.querySelector("#err-close").addEventListener("click", () => { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true"); });
+    card.querySelector("#err-close").addEventListener("click", () => {
+      overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true");
+      const btn = $("#pay-btn");
+      if (btn) btn.disabled = false; // let the customer retry
+    });
   }
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -180,6 +184,10 @@
       bad?.scrollIntoView({ behavior:"smooth", block:"center" });
       return;
     }
+
+    const submitBtn = $("#pay-btn");
+    if (submitBtn?.disabled) return; // already submitting — ignore repeat clicks
+    if (submitBtn) submitBtn.disabled = true;
 
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
@@ -216,7 +224,39 @@
     const res = await window.worldidpSubmitOrder(payload);
     if (!res.ok) { showError(res.error); return; }
 
-    window.location.href = "thank-you.html?ref=" + encodeURIComponent(ref);
+    // Travel companion — submit their own linked application, if one was added at checkout.
+    // Same trip, same package, same shipping address (if Print + Digital) — only
+    // their personal details, documents and price differ.
+    const refs = [ref];
+    try {
+      const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
+      const compFiles = JSON.parse(sessionStorage.getItem("worldidp_files_companion") || "null");
+      if (companion && compFiles) {
+        const companionRef = ref + "-2";
+        const compRes = await window.worldidpSubmitOrder({
+          ref: companionRef,
+          format: companion.format, validYears: companion.validYears, country: companion.country,
+          total: companion.total, currency: "USD",
+          firstName: companion.firstName, lastName: companion.lastName, email: companion.email,
+          category: companion.category,
+          address1: payload.address1, address2: payload.address2, state: payload.state,
+          city: payload.city, zip: payload.zip, shippingMethod: payload.shippingMethod,
+          express: state.express, // same order, same processing speed
+          files: compFiles,
+          groupRef: ref, isCompanion: true,
+        });
+        if (compRes.ok) {
+          refs.push(companionRef);
+        } else {
+          // Your application saved fine, but your companion's did not —
+          // don't silently show "success" when only half the order went through.
+          showError("Your application was saved, but we couldn't save your travel companion's — please try Submit again.");
+          return;
+        }
+      }
+    } catch (e) { console.error("[WorldIDP] companion submit failed:", e); }
+
+    window.location.href = "thank-you.html?ref=" + encodeURIComponent(refs.join(","));
   });
 
   /* ---------- header scroll ---------- */

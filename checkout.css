@@ -174,6 +174,8 @@ ul{margin:0;padding:0;list-style:none;}
 .form-section:nth-child(2){animation-delay:.16s;}
 .form-section:nth-child(3){animation-delay:.26s;}
 .form-section:nth-child(4){animation-delay:.36s;}
+.form-section:nth-child(5){animation-delay:.46s;}
+.companion-zone{animation:sectionIn 620ms cubic-bezier(.2,.7,.2,1) both; animation-delay:.22s;}
 @keyframes sectionIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
 /* grid of fields */
@@ -485,3 +487,85 @@ ul{margin:0;padding:0;list-style:none;}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233168f3' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 9px center; }
 .phone-cc:focus{ outline:none; }
+
+/* ══════════════════════════════════════════════════════════════
+   TRAVEL COMPANION — add a second driver, 20% off their permit
+   ══════════════════════════════════════════════════════════════ */
+.companion-zone{ margin-top:26px; padding-top:26px; border-top:1px solid rgba(16,26,51,.08); }
+
+/* ---- collapsed: the invite card ---- */
+.companion-invite{
+  display:flex; align-items:center; gap:18px; padding:20px 22px; border-radius:20px;
+  border:1.5px dashed rgba(36,86,230,.35);
+  background:linear-gradient(135deg, rgba(49,104,243,.05), rgba(79,134,255,.02));
+  transition:border-color .2s ease, background .2s ease;
+}
+.companion-invite:hover{ border-color:rgba(36,86,230,.55); background:linear-gradient(135deg, rgba(49,104,243,.08), rgba(79,134,255,.03)); }
+.ci-seats{
+  flex:none; width:56px; height:44px; color:var(--blue-600); display:flex; align-items:center; justify-content:center;
+  background:#fff; border-radius:14px; box-shadow:0 8px 20px -8px rgba(36,86,230,.3);
+}
+.ci-seats svg{ width:34px; height:26px; }
+.ci-copy{ flex:1; min-width:0; }
+.ci-kicker{ margin:0 0 3px; font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--blue-600); }
+.ci-copy h3{ margin:0; font-size:1.02rem; font-weight:850; color:var(--blue-950); letter-spacing:-.01em; }
+.ci-copy h3 span{ color:var(--ok); }
+.ci-sub{ margin:4px 0 0; font-size:.84rem; color:var(--muted); }
+.ci-add-btn{
+  flex:none; display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:12px; border:0; cursor:pointer;
+  background:linear-gradient(135deg,var(--blue-800),var(--blue-600)); color:#fff; font-weight:800; font-size:.86rem;
+  box-shadow:0 12px 24px -10px rgba(36,86,230,.5); transition:transform .15s ease, box-shadow .15s ease;
+  white-space:nowrap;
+}
+.ci-add-btn:hover{ transform:translateY(-1px); box-shadow:0 16px 30px -10px rgba(36,86,230,.6); }
+.ci-add-btn svg{ width:16px; height:16px; }
+@media (max-width:640px){
+  .companion-invite{ flex-direction:column; align-items:stretch; text-align:center; }
+  .ci-seats{ margin:0 auto; }
+  .ci-add-btn{ justify-content:center; }
+}
+
+/* ---- expanded: the companion form panel ---- */
+.companion-panel{
+  position:relative; overflow:hidden; padding:24px 24px 20px; border-radius:22px;
+  border:1.5px solid rgba(21,160,107,.35);
+  background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(231,248,240,.5));
+  box-shadow:0 20px 50px -24px rgba(21,160,107,.35);
+  animation:companionReveal 480ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes companionReveal{
+  from{ opacity:0; transform:translateY(-10px) scale(.98); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+.cp-ribbon{
+  position:absolute; top:16px; right:-32px; width:140px; padding:5px 0; text-align:center;
+  background:linear-gradient(135deg,var(--ok),#1ec98a); color:#fff; font-weight:900; font-size:.72rem;
+  letter-spacing:.06em; transform:rotate(40deg); box-shadow:0 6px 14px -4px rgba(21,160,107,.5);
+}
+.cp-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:18px; padding-right:70px; }
+.cp-head-left{ display:flex; align-items:flex-start; gap:12px; }
+.cp-avatar{
+  flex:none; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--ok),#1ec98a); color:#fff; font-weight:900; font-size:1rem;
+  box-shadow:0 8px 18px -6px rgba(21,160,107,.5);
+}
+.cp-head h3{ margin:0; font-size:1rem; font-weight:850; color:var(--blue-950); }
+.cp-head p{ margin:3px 0 0; font-size:.82rem; color:var(--muted); }
+.cp-remove{
+  flex:none; display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; cursor:pointer;
+  color:var(--muted); font-size:.8rem; font-weight:700; padding:6px 4px; border-radius:8px; transition:color .15s ease;
+}
+.cp-remove:hover{ color:#e0433d; }
+.cp-remove svg{ width:14px; height:14px; }
+
+.cp-price-note{
+  display:flex; align-items:flex-start; gap:10px; margin-top:16px; padding:12px 14px; border-radius:14px;
+  background:rgba(21,160,107,.08); border:1px solid rgba(21,160,107,.18); color:var(--blue-950);
+}
+.cp-price-note svg{ flex:none; width:16px; height:16px; color:var(--ok); margin-top:1px; }
+.cp-price-note span{ font-size:.8rem; line-height:1.5; color:var(--muted); }
+.cp-price-note b{ color:var(--blue-950); }
+
+/* ---- order summary: companion line item ---- */
+.sum-line.sum-companion .sl-k{ display:flex; flex-direction:column; }
+.sum-line.sum-companion .sl-k small.comp-save{ color:var(--ok); font-weight:800; }
