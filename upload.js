@@ -43,7 +43,15 @@
     set("[data-recap-country]", country);
 
     function refreshTotal() {
-      set("[data-recap-total]", String(computeTotal(format, years) + (addonState.express ? 14 : 0)));
+      let total = computeTotal(format, years) + (addonState.express ? 14 : 0);
+      // Travel companion — keep this total consistent with what the
+      // customer already saw at checkout (their price + companion's 20%-off price),
+      // instead of silently dropping back to a single-person total.
+      try {
+        const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
+        if (companion && companion.total) total += Number(companion.total) || 0;
+      } catch (e) {}
+      set("[data-recap-total]", String(total));
     }
     refreshTotal();
 
