@@ -436,3 +436,6 @@ tbody tr:hover{ background:rgba(255,255,255,.02); }
 .doc-slot img{ width:100%; height:140px; object-fit:cover; display:block; background:#0a0f24; }
 .doc-slot .doc-empty{ height:140px; display:flex; align-items:center; justify-content:center; color:var(--muted-2); font-size:.78rem; }
 .doc-slot a.doc-open{ display:block; text-align:center; padding:8px; font-size:.76rem; color:var(--brand-2); }
+
+/* Linked travel-companion application badge */
+.link-badge{ cursor:help; font-size:.78rem; opacity:.75; }

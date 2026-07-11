@@ -116,3 +116,13 @@ create policy "admins update applications"
   to authenticated
   using (true)
   with check (true);
+
+-- ── Travel Companion feature ──────────────────────────────────────────
+-- When a customer adds a second driver ("travel companion") to their
+-- order, we store TWO rows in `applications` — one per person, each with
+-- their own documents — linked by a shared `group_ref` (equal to the
+-- primary applicant's own `ref`). `is_companion` marks the discounted,
+-- secondary row so the admin dashboard can group and label them clearly.
+alter table public.applications add column if not exists group_ref text;
+alter table public.applications add column if not exists is_companion boolean not null default false;
+create index if not exists applications_group_ref_idx on public.applications (group_ref);

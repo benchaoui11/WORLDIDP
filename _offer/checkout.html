@@ -194,6 +194,80 @@
           </div>
         </section>
 
+        <!-- ═══════════ TRAVEL COMPANION (add a second driver, 20% off) ═══════════ -->
+        <section class="companion-zone">
+          <div class="companion-invite" id="companion-invite">
+            <div class="ci-seats" aria-hidden="true">
+              <svg viewBox="0 0 64 48" fill="none">
+                <circle cx="18" cy="18" r="9" stroke="currentColor" stroke-width="2.2"/>
+                <path d="M6 42c0-8 5.4-13 12-13s12 5 12 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                <circle cx="46" cy="18" r="9" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 4" opacity=".55"/>
+                <path d="M34 42c0-8 5.4-13 12-13s12 5 12 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3 4" opacity=".55"/>
+              </svg>
+            </div>
+            <div class="ci-copy">
+              <p class="ci-kicker">Traveling with someone else?</p>
+              <h3>Add their IDP to this order — <span>save 20%</span> on theirs.</h3>
+              <p class="ci-sub">Same trip, one checkout. We'll collect their documents right after yours.</p>
+            </div>
+            <button type="button" class="ci-add-btn" id="companion-add-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add a travel companion
+            </button>
+          </div>
+
+          <div class="companion-panel" id="companion-panel" hidden>
+            <div class="cp-ribbon">20% OFF</div>
+            <div class="cp-head">
+              <div class="cp-head-left">
+                <span class="cp-avatar">2</span>
+                <div>
+                  <h3>Travel companion</h3>
+                  <p>Their permit is prepared alongside yours, at 20% off.</p>
+                </div>
+              </div>
+              <button type="button" class="cp-remove" id="companion-remove-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                Remove
+              </button>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="comp-first-name">First name <span class="req">*</span></label>
+                <input class="input" type="text" id="comp-first-name" placeholder="Enter first name" autocomplete="off" />
+                <span class="field-err">Required.</span>
+              </div>
+              <div class="field">
+                <label for="comp-last-name">Last name <span class="req">*</span></label>
+                <input class="input" type="text" id="comp-last-name" placeholder="Enter last name" autocomplete="off" />
+                <span class="field-err">Required.</span>
+              </div>
+              <div class="field span-2">
+                <label for="comp-email">Email address <span class="req">*</span></label>
+                <input class="input" type="email" id="comp-email" placeholder="companion@example.com" autocomplete="off" />
+                <span class="field-err">Please enter a valid email.</span>
+                <span class="hint">Their finished document is delivered to this inbox.</span>
+              </div>
+              <div class="field span-2">
+                <label for="comp-category">License category <span class="req">*</span></label>
+                <select class="select" id="comp-category">
+                  <option value="A">A — Motorcycle</option>
+                  <option value="B" selected>B — Car</option>
+                  <option value="C">C — Truck</option>
+                  <option value="D">D — Bus</option>
+                  <option value="E">E — With trailer</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cp-price-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+              <span>Same package as you — <b data-comp-package>Digital Only, 1-year</b>. They'll upload their own documents right after yours.</span>
+            </div>
+          </div>
+        </section>
+
         <!-- license category -->
         <section class="form-section">
           <div class="fieldset-head">
@@ -346,6 +420,13 @@
           <div class="sum-line sum-disc">
             <span class="sl-k">Launch discount (23%)</span>
             <span class="sl-v" data-sum-disc>−$15</span>
+          </div>
+          <div class="sum-line sum-companion" id="sum-companion-line" hidden>
+            <span class="sl-k">
+              <span data-sum-comp-name>Travel companion</span>
+              <small class="comp-save" data-sum-comp-save>You saved $10</small>
+            </span>
+            <span class="sl-v" data-sum-comp-total>$39</span>
           </div>
           <div class="sum-line">
             <span class="sl-k">Processing &amp; delivery</span>

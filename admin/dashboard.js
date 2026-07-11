@@ -107,11 +107,11 @@
     tbody.innerHTML = data.slice(0, 25).map((v) => `
       <tr>
         <td class="mono-cell">${timeAgo(v.created_at)}</td>
-        <td>${v.country || '—'}</td>
-        <td>${v.device || '—'}</td>
-        <td>${[v.browser, v.os].filter(Boolean).join(' / ') || '—'}</td>
-        <td>${truncate(v.referrer, 28) || 'Direct'}</td>
-        <td class="mono-cell">${v.landing_page || '/'}</td>
+        <td>${escapeHtml(v.country) || '—'}</td>
+        <td>${escapeHtml(v.device) || '—'}</td>
+        <td>${escapeHtml([v.browser, v.os].filter(Boolean).join(' / ')) || '—'}</td>
+        <td>${escapeHtml(truncate(v.referrer, 28)) || 'Direct'}</td>
+        <td class="mono-cell">${escapeHtml(v.landing_page) || '/'}</td>
       </tr>`).join('');
   }
 
@@ -134,7 +134,7 @@
         <td class="mono-cell">${timeAgo(r.changed_at)}</td>
         <td><span class="tag ${r.from_mode}">${r.from_mode || '—'}</span></td>
         <td><span class="tag ${r.to_mode}">${r.to_mode}</span></td>
-        <td>${r.changed_by || '—'}</td>
+        <td>${escapeHtml(r.changed_by) || '—'}</td>
       </tr>`).join('');
   }
 
@@ -213,13 +213,14 @@
 
   function packageLabel(a) {
     const fmt = a.format === 'physical' ? 'Print + Digital' : 'Digital Only';
-    const yrs = a.validity_years ? `${a.validity_years} Year${a.validity_years > 1 ? 's' : ''}` : '';
+    const y = Number(a.validity_years) || 0; // defensively force numeric — never echo raw text
+    const yrs = y ? `${y} Year${y > 1 ? 's' : ''}` : '';
     return [fmt, yrs].filter(Boolean).join(' — ');
   }
 
   async function loadCoreData() {
     const appsRes = await client.from('applications')
-      .select('ref, status, format, validity_years, total, currency, first_name, last_name, email, phone, destination_country, shipping_method, address_line1, address_line2, state_region, city, postal_code, vip_processing, file_selfie, file_license_front, file_license_back, file_signature, created_at')
+      .select('ref, status, format, validity_years, total, currency, first_name, last_name, email, phone, destination_country, shipping_method, address_line1, address_line2, state_region, city, postal_code, vip_processing, group_ref, is_companion, file_selfie, file_license_front, file_license_back, file_signature, created_at')
       .order('created_at', { ascending: false })
       .limit(5000);
 
@@ -264,7 +265,7 @@
     productSel.innerHTML = '<option value="">Package: all</option>' + packages.map((p) => `<option value="${p}">${p}</option>`).join('');
 
     const appStatuses = Array.from(new Set(_applications.map((a) => a.status).filter(Boolean))).sort();
-    appStatusSel.innerHTML = '<option value="">Application status: all</option>' + appStatuses.map((s) => `<option value="${s}">${s}</option>`).join('');
+    appStatusSel.innerHTML = '<option value="">Application status: all</option>' + appStatuses.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
   }
 
   function getFilters() {
@@ -313,16 +314,21 @@
 
     tbody.innerHTML = rows.map((a, i) => {
       const rowId = 'ord-' + i;
-      const name = [a.first_name, a.last_name].filter(Boolean).join(' ');
-      const address = [a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', ');
+      const name = escapeHtml([a.first_name, a.last_name].filter(Boolean).join(' '));
+      const address = escapeHtml([a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', '));
+      const email = escapeHtml(a.email);
+      const phone = escapeHtml(a.phone);
+      const destCountry = escapeHtml(a.destination_country);
+      const refSafe = escapeHtml(a.ref);
+      const groupRefSafe = escapeHtml(a.group_ref);
       return `
         <tr>
           <td><button class="row-expand-btn" data-expand="${rowId}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
-          <td class="mono-cell">${a.ref}</td>
-          <td>${a.email || '—'}</td>
+          <td class="mono-cell">${refSafe}${a.group_ref ? ` <span class="link-badge" title="Linked to ${groupRefSafe}">🔗</span>` : ""}</td>
+          <td>${email || '—'}</td>
           <td class="mono-cell">${packageLabel(a)}</td>
           <td>$${Number(a.total || 0).toLocaleString()}</td>
-          <td><span class="status-pill ${a.status}">${a.status || '—'}</span></td>
+          <td><span class="status-pill ${safeStatusClass(a.status)}">${escapeHtml(a.status) || '—'}</span></td>
           <td class="mono-cell">${timeAgo(a.created_at)}</td>
           <td></td>
         </tr>
@@ -330,14 +336,14 @@
           <td colspan="8">
             <div class="detail-grid">
               <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
-              <div><div class="dk">Phone</div><div class="dv">${a.phone || '—'}</div></div>
-              <div><div class="dk">Destination country</div><div class="dv">${a.destination_country || '—'}</div></div>
+              <div><div class="dk">Phone</div><div class="dv">${phone || '—'}</div></div>
+              <div><div class="dk">Destination country</div><div class="dv">${destCountry || '—'}</div></div>
               <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
               ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
               <div>
                 <div class="dk">Status</div>
                 <div class="dv" style="display:flex; align-items:center;">
-                  <select class="status-select" data-status-select="${rowId}" data-ref="${a.ref}">
+                  <select class="status-select" data-status-select="${rowId}" data-ref="${refSafe}">
                     ${['submitted','reviewing','paid','completed','rejected'].map((s) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
                   </select>
                   <span class="status-save-hint" data-status-hint="${rowId}">Saved</span>
@@ -408,16 +414,21 @@
 
     tbody.innerHTML = rows.map((a, i) => {
       const rowId = 'po-' + i;
-      const name = [a.first_name, a.last_name].filter(Boolean).join(' ');
-      const address = [a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', ');
+      const name = escapeHtml([a.first_name, a.last_name].filter(Boolean).join(' '));
+      const address = escapeHtml([a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', '));
+      const email = escapeHtml(a.email);
+      const phone = escapeHtml(a.phone);
+      const destCountry = escapeHtml(a.destination_country);
+      const refSafe = escapeHtml(a.ref);
+      const groupRefSafe = escapeHtml(a.group_ref);
       return `
         <tr>
           <td><button class="row-expand-btn" data-expand="${rowId}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
-          <td class="mono-cell">${a.ref}</td>
-          <td>${a.email || '—'}</td>
+          <td class="mono-cell">${refSafe}${a.group_ref ? ` <span class="link-badge" title="Linked to ${groupRefSafe}">🔗</span>` : ""}</td>
+          <td>${email || '—'}</td>
           <td class="mono-cell">${packageLabel(a)}</td>
           <td>$${Number(a.total || 0).toLocaleString()}</td>
-          <td><span class="status-pill ${a.status}">${a.status}</span></td>
+          <td><span class="status-pill ${safeStatusClass(a.status)}">${escapeHtml(a.status)}</span></td>
           <td class="mono-cell">${timeAgo(a.created_at)}</td>
           <td></td>
         </tr>
@@ -425,8 +436,8 @@
           <td colspan="8">
             <div class="detail-grid">
               <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
-              <div><div class="dk">Phone</div><div class="dv">${a.phone || '—'}</div></div>
-              <div><div class="dk">Destination country</div><div class="dv">${a.destination_country || '—'}</div></div>
+              <div><div class="dk">Phone</div><div class="dv">${phone || '—'}</div></div>
+              <div><div class="dk">Destination country</div><div class="dv">${destCountry || '—'}</div></div>
               <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
               ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
             </div>
@@ -546,6 +557,30 @@
   }
 
   // ═══════════════════ Helpers ═══════════════════
+  // SECURITY: applications/visitors data (name, email, phone, referrer...)
+  // comes from public, unauthenticated form submissions. It must NEVER be
+  // interpolated into innerHTML without escaping — otherwise a malicious
+  // submission (e.g. a "first name" containing a <script> tag) would
+  // execute inside this authenticated admin session. Every dynamic value
+  // rendered below is passed through this first.
+  // Only ever allow a known-safe status into a CSS class attribute —
+  // stricter than escaping, since this value sits inside an attribute,
+  // not text content. Anything unexpected falls back to a neutral class.
+  const KNOWN_STATUSES = new Set(['submitted', 'reviewing', 'paid', 'completed', 'rejected']);
+  function safeStatusClass(status) {
+    return KNOWN_STATUSES.has(status) ? status : 'submitted';
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function setStat(id, text) {
     const el = document.getElementById(id);
     if (!el) return;
