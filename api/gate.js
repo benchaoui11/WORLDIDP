@@ -75,8 +75,8 @@ const ROOT = process.cwd();
 const PAGES = {
   '/':                                     { offer: '_offer/index.html',            white: '_white/index.html' },
   '/index.html':                           { offer: '_offer/index.html',            white: '_white/index.html' },
-  '/countries.html':                       { offer: '_offer/countries.html',        white: '_white/countries.html' },
-  '/what-is-idp.html':                     { offer: '_offer/what-is-idp.html',      white: '_white/what-is-idp.html' },
+  '/countries.html':                       { offer: '_offer/countries.html',        white: null },
+  '/what-is-idp.html':                     { offer: '_offer/what-is-idp.html',      white: null },
 
   '/about.html':                           { offer: null, white: '_white/about.html' },
   '/contact.html':                         { offer: null, white: '_white/contact.html' },
@@ -84,7 +84,6 @@ const PAGES = {
   '/disclaimer.html':                      { offer: null, white: '_white/disclaimer.html' },
   '/privacy.html':                         { offer: null, white: '_white/privacy.html' },
   '/refunds.html':                         { offer: null, white: '_white/refunds.html' },
-  '/shipping.html':                        { offer: null, white: '_white/shipping.html' },
   '/terms.html':                           { offer: null, white: '_white/terms.html' },
 
   '/about-us.html':                        { offer: '_offer/about-us.html',        white: null },

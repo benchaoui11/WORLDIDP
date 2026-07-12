@@ -16,7 +16,6 @@
     { "source": "/disclaimer.html", "destination": "/api/gate" },
     { "source": "/privacy.html", "destination": "/api/gate" },
     { "source": "/refunds.html", "destination": "/api/gate" },
-    { "source": "/shipping.html", "destination": "/api/gate" },
     { "source": "/terms.html", "destination": "/api/gate" },
 
     { "source": "/about-us.html", "destination": "/api/gate" },
