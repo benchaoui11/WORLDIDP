@@ -11,13 +11,13 @@ document.querySelectorAll(".navlinks a").forEach(link=>link.addEventListener("cl
 const requestForm=document.querySelector("#translation-form");
 if(requestForm){
   const selectedService=new URLSearchParams(window.location.search).get("service");
-  if(selectedService&&["standard","priority","printed"].includes(selectedService)){
+  if(selectedService&&["standard","priority","custom"].includes(selectedService)){
     document.querySelector(`#service-${selectedService}`)?.click();
   }
   requestForm.addEventListener("submit",event=>{
     event.preventDefault();
     const data=new FormData(requestForm);
-    const subject=encodeURIComponent("Translation request — WorldIDP");
+    const subject=encodeURIComponent("Translation request - WorldIDP");
     const body=encodeURIComponent(
 `Hello WorldIDP,
 
@@ -33,25 +33,9 @@ Needed by: ${data.get("deadline")||"Not specified"}
 Preferred delivery: ${data.get("delivery")}
 Notes: ${data.get("notes")||"None"}
 
-I understand that WorldIDP provides a private translation service only and does not issue government documents, licences, permits or legal certification.`
+I understand that WorldIDP provides a private document translation service only.`
     );
     window.location.href=`mailto:hello@worldidp.com?subject=${subject}&body=${body}`;
     document.querySelector(".form-status")?.classList.add("show");
-  });
-}
-
-const countrySearch=document.querySelector("#country-search");
-if(countrySearch){
-  const cards=[...document.querySelectorAll(".country-card")];
-  const noResults=document.querySelector(".no-results");
-  countrySearch.addEventListener("input",()=>{
-    const query=countrySearch.value.trim().toLowerCase();
-    let visible=0;
-    cards.forEach(card=>{
-      const match=!query||card.textContent.toLowerCase().includes(query);
-      card.hidden=!match;
-      if(match)visible++;
-    });
-    noResults?.classList.toggle("show",visible===0);
   });
 }

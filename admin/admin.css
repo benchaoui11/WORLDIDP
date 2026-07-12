@@ -439,3 +439,12 @@ tbody tr:hover{ background:rgba(255,255,255,.02); }
 
 /* Linked travel-companion application badge */
 .link-badge{ cursor:help; font-size:.78rem; opacity:.75; }
+
+/* ══════════════ GROUPED ORDERS (travel companion) ══════════════ */
+.party-badge{ display:inline-flex; align-items:center; gap:3px; font-size:.72rem; font-weight:700;
+  background:rgba(49,104,243,.12); color:var(--brand-2); padding:2px 8px; border-radius:999px; margin-left:4px; }
+.status-pill.mixed{ background:rgba(245,179,1,.12); color:#ffcf5c; }
+.traveler-divider{ border:0; border-top:1px dashed var(--line-2); margin:18px 0; }
+.traveler-block + .traveler-block{ margin-top:0; }
+.traveler-label{ font-size:.74rem; font-weight:700; color:var(--brand-2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; }
+.traveler-label .mono-cell{ font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; margin-left:4px; }

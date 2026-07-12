@@ -288,11 +288,47 @@
     renderOrders();
   });
 
+  // ─────────────────── Grouped order helpers (travel companion support) ───────────────────
+  // A companion's row points back to its primary via group_ref; the primary's
+  // own key is just its own ref. This lets us always render ONE order row
+  // per travel party, never split across two lines.
+  function groupKey(a) { return a.group_ref || a.ref; }
+
+  function memberDetailHTML(a, subId, showLabel) {
+    const name = escapeHtml([a.first_name, a.last_name].filter(Boolean).join(' '));
+    const address = escapeHtml([a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', '));
+    const phone = escapeHtml(a.phone);
+    const destCountry = escapeHtml(a.destination_country);
+    const refSafe = escapeHtml(a.ref);
+    const label = showLabel ? (a.is_companion ? 'Travel companion' : 'Primary traveler') : null;
+    return `
+      <div class="traveler-block">
+        ${label ? `<div class="traveler-label">${label} <span class="mono-cell">— ${refSafe}</span></div>` : ''}
+        <div class="detail-grid">
+          <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
+          <div><div class="dk">Phone</div><div class="dv">${phone || '—'}</div></div>
+          <div><div class="dk">Destination country</div><div class="dv">${destCountry || '—'}</div></div>
+          <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
+          ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
+          <div>
+            <div class="dk">Status</div>
+            <div class="dv" style="display:flex; align-items:center;">
+              <select class="status-select" data-status-select="${subId}" data-ref="${refSafe}">
+                ${['submitted','reviewing','paid','completed','rejected'].map((s) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
+              </select>
+              <span class="status-save-hint" data-status-hint="${subId}">Saved</span>
+            </div>
+          </div>
+        </div>
+        <button class="view-docs-btn" data-docs="${subId}">View Documents${label ? ` — ${escapeHtml(a.first_name) || label}` : ''}</button>
+      </div>`;
+  }
+
   function renderOrders() {
     const f = getFilters();
     const tbody = document.getElementById('orders-tbody');
 
-    const rows = _applications.filter((a) => {
+    const matched = _applications.filter((a) => {
       if (f.search) {
         const hay = (a.ref + ' ' + (a.email || '')).toLowerCase();
         if (!hay.includes(f.search)) return false;
@@ -304,59 +340,62 @@
       return true;
     });
 
-    document.getElementById('orders-count').textContent = rows.length + ' of ' + _applications.length;
+    // Group by travel party — a companion always stays together with their
+    // primary applicant as ONE order, even if only one of them individually
+    // matched the filter (so a party never gets split apart on screen).
+    const matchedKeys = new Set(matched.map(groupKey));
+    const groups = new Map();
+    _applications.forEach((a) => {
+      const key = groupKey(a);
+      if (!matchedKeys.has(key)) return;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(a);
+    });
+    groups.forEach((members) => members.sort((x, y) => (x.is_companion ? 1 : 0) - (y.is_companion ? 1 : 0)));
+    const groupList = Array.from(groups.values()).sort((g1, g2) => new Date(g2[0].created_at) - new Date(g1[0].created_at));
+
+    const totalGroups = new Set(_applications.map(groupKey)).size;
+    document.getElementById('orders-count').textContent = groupList.length + ' of ' + totalGroups;
 
     if (!_coreDataReady) return; // still loading
-    if (!rows.length) {
+    if (!groupList.length) {
       tbody.innerHTML = `<tr class="empty-row"><td colspan="8">${_applications.length ? 'No applications match your filters.' : 'No applications yet.'}</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = rows.map((a, i) => {
+    tbody.innerHTML = groupList.map((members, i) => {
       const rowId = 'ord-' + i;
-      const name = escapeHtml([a.first_name, a.last_name].filter(Boolean).join(' '));
-      const address = escapeHtml([a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', '));
-      const email = escapeHtml(a.email);
-      const phone = escapeHtml(a.phone);
-      const destCountry = escapeHtml(a.destination_country);
-      const refSafe = escapeHtml(a.ref);
-      const groupRefSafe = escapeHtml(a.group_ref);
+      const primary = members[0];
+      const isGroup = members.length > 1;
+      const totalValue = members.reduce((s, m) => s + (Number(m.total) || 0), 0);
+      const refSafe = escapeHtml(primary.ref);
+      const email = escapeHtml(primary.email);
+      const statuses = new Set(members.map((m) => m.status));
+      const statusCell = statuses.size === 1
+        ? `<span class="status-pill ${safeStatusClass(primary.status)}">${escapeHtml(primary.status) || '—'}</span>`
+        : `<span class="status-pill mixed" title="Travelers have different statuses">Mixed</span>`;
+
       return `
         <tr>
           <td><button class="row-expand-btn" data-expand="${rowId}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
-          <td class="mono-cell">${refSafe}${a.group_ref ? ` <span class="link-badge" title="Linked to ${groupRefSafe}">🔗</span>` : ""}</td>
+          <td class="mono-cell">${refSafe}${isGroup ? ` <span class="party-badge" title="Travel party of ${members.length}">👥 ${members.length}</span>` : ''}</td>
           <td>${email || '—'}</td>
-          <td class="mono-cell">${packageLabel(a)}</td>
-          <td>$${Number(a.total || 0).toLocaleString()}</td>
-          <td><span class="status-pill ${safeStatusClass(a.status)}">${escapeHtml(a.status) || '—'}</span></td>
-          <td class="mono-cell">${timeAgo(a.created_at)}</td>
+          <td class="mono-cell">${packageLabel(primary)}${isGroup ? ` · ${members.length} travelers` : ''}</td>
+          <td>$${totalValue.toLocaleString()}</td>
+          <td>${statusCell}</td>
+          <td class="mono-cell">${timeAgo(primary.created_at)}</td>
           <td></td>
         </tr>
         <tr class="detail-row" id="${rowId}" style="display:none;">
           <td colspan="8">
-            <div class="detail-grid">
-              <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
-              <div><div class="dk">Phone</div><div class="dv">${phone || '—'}</div></div>
-              <div><div class="dk">Destination country</div><div class="dv">${destCountry || '—'}</div></div>
-              <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
-              ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
-              <div>
-                <div class="dk">Status</div>
-                <div class="dv" style="display:flex; align-items:center;">
-                  <select class="status-select" data-status-select="${rowId}" data-ref="${refSafe}">
-                    ${['submitted','reviewing','paid','completed','rejected'].map((s) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
-                  </select>
-                  <span class="status-save-hint" data-status-hint="${rowId}">Saved</span>
-                </div>
-              </div>
-            </div>
-            <button class="view-docs-btn" data-docs="${rowId}">View Documents</button>
+            ${members.map((a, mi) => memberDetailHTML(a, rowId + '-m' + mi, isGroup)).join(isGroup ? '<hr class="traveler-divider" />' : '')}
           </td>
         </tr>`;
     }).join('');
 
-    // Wire expand toggles + docs buttons + status changes for this render pass.
-    rows.forEach((a, i) => {
+    // Wire expand toggles, docs buttons, and status changes for every
+    // traveler in every group rendered this pass.
+    groupList.forEach((members, i) => {
       const rowId = 'ord-' + i;
       const btn = tbody.querySelector(`[data-expand="${rowId}"]`);
       const detail = document.getElementById(rowId);
@@ -365,14 +404,13 @@
         detail.style.display = open ? 'none' : '';
         btn.classList.toggle('is-open', !open);
       });
-      const docsBtn = tbody.querySelector(`[data-docs="${rowId}"]`);
-      if (docsBtn) {
-        docsBtn.addEventListener('click', () => openDocsModal(a, a.ref));
-      }
-      const statusSelect = tbody.querySelector(`[data-status-select="${rowId}"]`);
-      if (statusSelect) {
-        statusSelect.addEventListener('change', () => updateApplicationStatus(a, statusSelect.value, rowId));
-      }
+      members.forEach((member, mi) => {
+        const subId = rowId + '-m' + mi;
+        const docsBtn = tbody.querySelector(`[data-docs="${subId}"]`);
+        if (docsBtn) docsBtn.addEventListener('click', () => openDocsModal(member, member.ref));
+        const statusSelect = tbody.querySelector(`[data-status-select="${subId}"]`);
+        if (statusSelect) statusSelect.addEventListener('change', () => updateApplicationStatus(member, statusSelect.value, subId));
+      });
     });
   }
 
@@ -403,50 +441,62 @@
   function renderPaidOrders() {
     const tbody = document.getElementById('paid-orders-tbody');
     if (!tbody) return;
-    const rows = _applications.filter((a) => a.status === 'paid' || a.status === 'completed');
-    document.getElementById('paid-orders-count').textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's');
+
+    // Show the WHOLE travel party if any member is paid/completed — so a
+    // companion's order is never lost from view just because their own
+    // status hasn't been updated yet.
+    const paidKeys = new Set(
+      _applications.filter((a) => a.status === 'paid' || a.status === 'completed').map(groupKey)
+    );
+    const groups = new Map();
+    _applications.forEach((a) => {
+      const key = groupKey(a);
+      if (!paidKeys.has(key)) return;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(a);
+    });
+    groups.forEach((members) => members.sort((x, y) => (x.is_companion ? 1 : 0) - (y.is_companion ? 1 : 0)));
+    const groupList = Array.from(groups.values()).sort((g1, g2) => new Date(g2[0].created_at) - new Date(g1[0].created_at));
+
+    document.getElementById('paid-orders-count').textContent = groupList.length + ' order' + (groupList.length === 1 ? '' : 's');
 
     if (!_coreDataReady) return;
-    if (!rows.length) {
+    if (!groupList.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No paid orders yet.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = rows.map((a, i) => {
+    tbody.innerHTML = groupList.map((members, i) => {
       const rowId = 'po-' + i;
-      const name = escapeHtml([a.first_name, a.last_name].filter(Boolean).join(' '));
-      const address = escapeHtml([a.address_line1, a.address_line2, a.city, a.state_region, a.postal_code].filter(Boolean).join(', '));
-      const email = escapeHtml(a.email);
-      const phone = escapeHtml(a.phone);
-      const destCountry = escapeHtml(a.destination_country);
-      const refSafe = escapeHtml(a.ref);
-      const groupRefSafe = escapeHtml(a.group_ref);
+      const primary = members[0];
+      const isGroup = members.length > 1;
+      const totalValue = members.reduce((s, m) => s + (Number(m.total) || 0), 0);
+      const refSafe = escapeHtml(primary.ref);
+      const email = escapeHtml(primary.email);
+      const statuses = new Set(members.map((m) => m.status));
+      const statusCell = statuses.size === 1
+        ? `<span class="status-pill ${safeStatusClass(primary.status)}">${escapeHtml(primary.status)}</span>`
+        : `<span class="status-pill mixed" title="Travelers have different statuses">Mixed</span>`;
+
       return `
         <tr>
           <td><button class="row-expand-btn" data-expand="${rowId}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
-          <td class="mono-cell">${refSafe}${a.group_ref ? ` <span class="link-badge" title="Linked to ${groupRefSafe}">🔗</span>` : ""}</td>
+          <td class="mono-cell">${refSafe}${isGroup ? ` <span class="party-badge" title="Travel party of ${members.length}">👥 ${members.length}</span>` : ''}</td>
           <td>${email || '—'}</td>
-          <td class="mono-cell">${packageLabel(a)}</td>
-          <td>$${Number(a.total || 0).toLocaleString()}</td>
-          <td><span class="status-pill ${safeStatusClass(a.status)}">${escapeHtml(a.status)}</span></td>
-          <td class="mono-cell">${timeAgo(a.created_at)}</td>
+          <td class="mono-cell">${packageLabel(primary)}${isGroup ? ` · ${members.length} travelers` : ''}</td>
+          <td>$${totalValue.toLocaleString()}</td>
+          <td>${statusCell}</td>
+          <td class="mono-cell">${timeAgo(primary.created_at)}</td>
           <td></td>
         </tr>
         <tr class="detail-row" id="${rowId}" style="display:none;">
           <td colspan="8">
-            <div class="detail-grid">
-              <div><div class="dk">Applicant</div><div class="dv">${name || '—'}</div></div>
-              <div><div class="dk">Phone</div><div class="dv">${phone || '—'}</div></div>
-              <div><div class="dk">Destination country</div><div class="dv">${destCountry || '—'}</div></div>
-              <div><div class="dk">Fast Processing</div><div class="dv">${a.vip_processing ? 'Yes' : 'No'}</div></div>
-              ${a.format === 'physical' ? `<div><div class="dk">Shipping address</div><div class="dv">${address || '—'}</div></div>` : ''}
-            </div>
-            <button class="view-docs-btn" data-docs="${rowId}">View Documents</button>
+            ${members.map((a, mi) => memberDetailHTML(a, rowId + '-m' + mi, isGroup)).join(isGroup ? '<hr class="traveler-divider" />' : '')}
           </td>
         </tr>`;
     }).join('');
 
-    rows.forEach((a, i) => {
+    groupList.forEach((members, i) => {
       const rowId = 'po-' + i;
       const btn = tbody.querySelector(`[data-expand="${rowId}"]`);
       const detail = document.getElementById(rowId);
@@ -455,8 +505,13 @@
         detail.style.display = open ? 'none' : '';
         btn.classList.toggle('is-open', !open);
       });
-      const docsBtn = tbody.querySelector(`[data-docs="${rowId}"]`);
-      if (docsBtn) docsBtn.addEventListener('click', () => openDocsModal(a, a.ref));
+      members.forEach((member, mi) => {
+        const subId = rowId + '-m' + mi;
+        const docsBtn = tbody.querySelector(`[data-docs="${subId}"]`);
+        if (docsBtn) docsBtn.addEventListener('click', () => openDocsModal(member, member.ref));
+        const statusSelect = tbody.querySelector(`[data-status-select="${subId}"]`);
+        if (statusSelect) statusSelect.addEventListener('change', () => updateApplicationStatus(member, statusSelect.value, subId));
+      });
     });
   }
 
