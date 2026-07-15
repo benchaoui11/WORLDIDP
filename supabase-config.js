@@ -112,22 +112,15 @@ window.worldidpSubmitOrder = async function (order) {
     );
     uploaded.forEach((u) => { if (u) fileUrls[u.key] = u.path; });
 
-    // 2) Idempotent insert: if this ref was already submitted (e.g. the
-    //    customer retried payment after the first attempt), reuse that
-    //    existing row instead of inserting a duplicate.
-    const { data: existing, error: lookupErr } = await supabase
-      .from(cfg.TABLE)
-      .select("ref")
-      .eq("ref", ref)
-      .maybeSingle();
-    if (lookupErr) throw lookupErr;
-
-    if (existing) {
-      // Already have an application for this ref — nothing more to insert.
-      // The caller can safely continue on to payment / retry payment.
-      return { ok: true, ref, reused: true };
-    }
-
+    // 2) Insert the application.
+    //
+    //    NOTE: there is deliberately NO "does this ref already exist?"
+    //    pre-check here. `anon` has INSERT-only access to this table (no
+    //    SELECT policy — the table holds every customer's email, phone,
+    //    address and document paths, so it must never be readable with the
+    //    public anon key). Any pre-check SELECT would therefore always come
+    //    back empty and be useless. Duplicates are handled properly by the
+    //    UNIQUE constraint on `ref` + the 23505 catch below instead.
     const row = {
       ref,
       status: "submitted",
@@ -161,21 +154,44 @@ window.worldidpSubmitOrder = async function (order) {
       file_signature: fileUrls.signature || null,
     };
 
-    const { data: inserted, error: insErr } = await supabase.from(cfg.TABLE).insert(row).select("order_number").single();
+    // Plain insert, NO .select() chained on. Chaining .select() makes
+    // PostgREST add "Prefer: return=representation", which needs a SELECT
+    // policy on top of the INSERT one — with INSERT-only access that made
+    // the whole statement fail with 401/42501 and roll the row back, so
+    // nothing ever saved. Without .select(), supabase-js sends
+    // "Prefer: return=minimal" and the insert succeeds on its own.
+    const { error: insErr } = await supabase.from(cfg.TABLE).insert(row);
+
+    let reused = false;
     if (insErr) {
-      // Race condition: another request for the same ref was inserted
-      // between our check above and this insert (e.g. a double-click or a
-      // fast retry). Treat that as success instead of a real failure —
-      // the application already exists either way.
+      // Duplicate ref (double-click, or the customer hit "Try again" after a
+      // submit that actually went through). The application already exists
+      // either way, so that's a success, not a failure.
       const isDuplicateRef = insErr.code === "23505" || /duplicate key/i.test(insErr.message || "");
-      if (isDuplicateRef) {
-        const { data: existing } = await supabase.from(cfg.TABLE).select("order_number").eq("ref", ref).single();
-        return { ok: true, ref, reused: true, orderNumber: existing?.order_number || null };
-      }
-      throw insErr;
+      if (!isDuplicateRef) throw insErr;
+      reused = true;
     }
 
-    return { ok: true, ref, orderNumber: inserted?.order_number || null };
+    // The order number is assigned by a database trigger, so we have to read
+    // it back. We can't SELECT the table directly (INSERT-only, by design),
+    // so we go through get_order_number() — a SECURITY DEFINER function that
+    // requires ref + the matching email together and returns nothing but the
+    // integer. Same two-factor rule as track_order().
+    let orderNumber = null;
+    try {
+      const { data: num } = await supabase.rpc("get_order_number", {
+        p_ref: ref,
+        p_email: order.email || "",
+      });
+      if (typeof num === "number") orderNumber = num;
+    } catch (e) {
+      // The application IS saved at this point — a missing order number is
+      // cosmetic (the thank-you page falls back to the ref). Never turn this
+      // into a failed submit.
+      console.warn("[FirstIDP] could not read order number:", e);
+    }
+
+    return { ok: true, ref, reused, orderNumber };
   } catch (e) {
     console.error("[FirstIDP] submit failed:", e);
     // Never surface raw database error text to the customer.
