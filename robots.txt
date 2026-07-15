@@ -1,4 +1,24 @@
+# Google Ads' crawler is separate from organic Search and must always
+# be able to crawl every page (including the funnel), or ads can get
+# disapproved with "Google can't crawl your landing page" — regardless
+# of what's blocked below for organic search crawlers.
+User-agent: AdsBot-Google
+Disallow:
+
+User-agent: AdsBot-Google-Mobile
+Disallow:
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /_white
+Disallow: /_offer
+Disallow: /api/
+
+# Application funnel (no SEO value)
+Disallow: /checkout.html
+Disallow: /payment.html
+Disallow: /upload-photos.html
+Disallow: /thank-you.html
 
 Sitemap: https://firstidp.com/sitemap.xml
