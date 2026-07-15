@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" data-site-mode="offer">
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Application | FirstIDP — Drive the World</title>
+  <meta name="description" content="Complete your International Driving Document application with FirstIDP. Secure checkout, instant digital delivery, valid in 195+ countries." />
+  <meta name="robots" content="noindex,follow" />
+  <link rel="icon" href="IMAGES/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="IMAGES/favicon-32.png" />
+  <link rel="apple-touch-icon" href="IMAGES/apple-touch-icon.png" />
+  <link rel="preload" href="IMAGES/digital-international-driving-permit-on-phone.webp" as="image" />
+  <link rel="preload" href="IMAGES/printed-international-driving-permit-booklet-card-phone.webp" as="image" />
+  <link rel="stylesheet" href="checkout.css" />
+</head>
+<body>
+
+  <!-- ambient travel route -->
+  <div class="bg-route" aria-hidden="true">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
+      <path class="br-path" d="M-40 720 C 320 700 460 420 760 460 S 1180 300 1500 180"
+            stroke="rgba(36,86,230,.16)" stroke-width="2" stroke-linecap="round"/>
+      <path class="br-path" style="animation-delay:-9s" d="M-40 200 C 280 240 520 520 880 470 S 1240 640 1500 560"
+            stroke="rgba(126,192,255,.16)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" data-header>
+    <a class="brand" href="index.html" aria-label="FirstIDP home">
+      <img src="IMAGES/firstidp-international-driving-permit-logo.webp" alt="FirstIDP — Drive the World" width="250" height="90" title="FirstIDP international driving permit logo" decoding="async" />
+    </a>
+
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a href="countries.html">Countries</a>
+      <a href="what-is-idp.html">What is IDP?</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="contact-us.html">Contact Us</a>
+      <a href="track-order.html">My Order</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="back-link" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        <span>Back to site</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="checkout-main">
+
+    <div class="flow-head">
+      <span class="flow-kicker"><span class="pulse" aria-hidden="true"></span>Application · Driver details</span>
+      <h1>Let's get you <span>ready to drive the world</span></h1>
+      <p>Enter the details exactly as they appear on your national driving license. Your document is generated from these — accuracy keeps you covered abroad.</p>
+
+      <div class="progress-rail" role="list" aria-label="Application progress">
+        <div class="pr-step active" role="listitem">
+          <span class="pr-bubble">1</span>
+          <span class="pr-label">Driver details</span>
+        </div>
+        <div class="pr-step" role="listitem">
+          <span class="pr-bubble">2</span>
+          <span class="pr-label">Upload photos</span>
+        </div>
+        <div class="pr-step" role="listitem">
+          <span class="pr-bubble">3</span>
+          <span class="pr-label">Payment</span>
+        </div>
+      </div>
+    </div>
+
+    <form id="checkout-form" novalidate>
+    <div class="checkout-grid">
+
+      <!-- ============ LEFT: FORM ============ -->
+      <div class="form-card">
+
+        <!-- contact -->
+        <section class="form-section">
+          <div class="fieldset-head">
+            <span class="fs-num">1</span>
+            <h2>Contact details</h2>
+          </div>
+          <p class="fieldset-sub">We'll send your finished document and order updates here.</p>
+
+          <div class="grid-2">
+            <div class="field span-2">
+              <label for="email">Email address <span class="req">*</span></label>
+              <input class="input" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+              <span class="field-err">Please enter a valid email.</span>
+              <span class="hint">Your digital permit is delivered to this inbox.</span>
+            </div>
+
+            <div class="field span-2">
+              <label for="phone">Phone — WhatsApp preferred <span class="req">*</span></label>
+              <div class="phone-wrap">
+                <select class="phone-cc" id="phone-cc" aria-label="Country calling code"></select>
+                <input type="tel" id="phone" name="phone" placeholder="81 234 5678" autocomplete="tel" required />
+              </div>
+              <span class="hint">A local number helps us reach you for delivery.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- identity -->
+        <section class="form-section">
+          <div class="fieldset-head">
+            <span class="fs-num">2</span>
+            <h2>Your identity</h2>
+          </div>
+          <p class="fieldset-sub">Match the spelling on your local license — letter for letter.</p>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="first-name">First name <span class="req">*</span></label>
+              <input class="input" type="text" id="first-name" name="first-name" placeholder="Enter first name" autocomplete="given-name" required />
+              <span class="field-err">Required.</span>
+            </div>
+            <div class="field">
+              <label for="last-name">Last name <span class="req">*</span></label>
+              <input class="input" type="text" id="last-name" name="last-name" placeholder="Enter last name" autocomplete="family-name" required />
+              <span class="field-err">Required.</span>
+            </div>
+            <div class="field span-2">
+              <label for="middle-name">Middle name <span class="hint" style="margin:0;font-weight:600;">(optional)</span></label>
+              <input class="input" type="text" id="middle-name" name="middle-name" placeholder="Enter middle name" autocomplete="additional-name" />
+            </div>
+          </div>
+
+          <div class="grid-3 dob" style="margin-top:14px;">
+            <div class="field">
+              <label for="dob-month">Birth month <span class="req">*</span></label>
+              <select class="select" id="dob-month" name="dob-month" required>
+                <option value="" disabled selected>Month</option>
+                <option value="01">January</option><option value="02">February</option>
+                <option value="03">March</option><option value="04">April</option>
+                <option value="05">May</option><option value="06">June</option>
+                <option value="07">July</option><option value="08">August</option>
+                <option value="09">September</option><option value="10">October</option>
+                <option value="11">November</option><option value="12">December</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dob-day">Day <span class="req">*</span></label>
+              <input class="input" type="number" id="dob-day" name="dob-day" placeholder="Day" min="1" max="31" required />
+            </div>
+            <div class="field">
+              <label for="dob-year">Year <span class="req">*</span></label>
+              <input class="input" type="number" id="dob-year" name="dob-year" placeholder="Year" min="1920" max="2010" required />
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:14px;">
+            <div class="field">
+              <label>Sex <span class="req">*</span></label>
+              <div class="seg" role="radiogroup" aria-label="Sex">
+                <input type="radio" id="sex-male" name="sex" value="Male" checked />
+                <label for="sex-male">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5 20 4M16 4h4v4"/></svg>
+                  Male
+                </label>
+                <input type="radio" id="sex-female" name="sex" value="Female" />
+                <label for="sex-female">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M12 14v7M9 18h6"/></svg>
+                  Female
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="birth-country">Country of birth <span class="req">*</span></label>
+              <select class="select" id="birth-country" name="birth-country" data-country-select required></select>
+            </div>
+            <div class="field span-2">
+              <label for="residence-country">Country of residence <span class="req">*</span></label>
+              <select class="select" id="residence-country" name="residence-country" data-country-select data-default="Thailand" required></select>
+              <span class="hint">This sets the country shown on your permit and your delivery region.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TRAVEL COMPANION (add a second driver, 20% off) ═══════════ -->
+        <section class="companion-zone">
+          <div class="companion-invite" id="companion-invite">
+            <div class="ci-seats" aria-hidden="true">
+              <svg viewBox="0 0 64 48" fill="none">
+                <circle cx="18" cy="18" r="9" stroke="currentColor" stroke-width="2.2"/>
+                <path d="M6 42c0-8 5.4-13 12-13s12 5 12 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                <circle cx="46" cy="18" r="9" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 4" opacity=".55"/>
+                <path d="M34 42c0-8 5.4-13 12-13s12 5 12 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3 4" opacity=".55"/>
+              </svg>
+            </div>
+            <div class="ci-copy">
+              <h3>Traveling with someone else? <span>Save 20%</span> on their IDP.</h3>
+            </div>
+            <button type="button" class="ci-add-btn" id="companion-add-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add second driver
+            </button>
+          </div>
+
+          <div class="companion-panel" id="companion-panel" hidden>
+            <div class="cp-ribbon">20% OFF</div>
+            <div class="cp-head">
+              <div class="cp-head-left">
+                <span class="cp-avatar">2</span>
+                <div>
+                  <h3>Travel companion</h3>
+                  <p>Their permit is prepared alongside yours, at 20% off.</p>
+                </div>
+              </div>
+              <button type="button" class="cp-remove" id="companion-remove-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                Remove
+              </button>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="comp-first-name">First name <span class="req">*</span></label>
+                <input class="input" type="text" id="comp-first-name" placeholder="Enter first name" autocomplete="off" />
+                <span class="field-err">Required.</span>
+              </div>
+              <div class="field">
+                <label for="comp-last-name">Last name <span class="req">*</span></label>
+                <input class="input" type="text" id="comp-last-name" placeholder="Enter last name" autocomplete="off" />
+                <span class="field-err">Required.</span>
+              </div>
+              <div class="field span-2">
+                <label for="comp-email">Email address <span class="req">*</span></label>
+                <input class="input" type="email" id="comp-email" placeholder="companion@example.com" autocomplete="off" />
+                <span class="field-err">Please enter a valid email.</span>
+                <span class="hint">Their finished document is delivered to this inbox.</span>
+              </div>
+              <div class="field span-2">
+                <label for="comp-category">License category <span class="req">*</span></label>
+                <select class="select" id="comp-category">
+                  <option value="A">A — Motorcycle</option>
+                  <option value="B" selected>B — Car</option>
+                  <option value="C">C — Truck</option>
+                  <option value="D">D — Bus</option>
+                  <option value="E">E — With trailer</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cp-price-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+              <span>Same package as you — <b data-comp-package>Digital Only, 1-year</b>. They'll upload their own documents right after yours.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- license category -->
+        <section class="form-section">
+          <div class="fieldset-head">
+            <span class="fs-num">3</span>
+            <h2>License category</h2>
+          </div>
+          <p class="fieldset-sub">Pick the category that matches your current national license.</p>
+
+          <div class="cat-grid" role="radiogroup" aria-label="License category">
+            <div class="cat">
+              <input type="checkbox" id="cat-a" name="category" value="A" />
+              <label for="cat-a">
+                <span class="cat-ico"><svg viewBox="0 0 36 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="5"/><circle cx="28" cy="18" r="5"/><path d="M8 18l5-7h5"/><path d="M13 11h7l3 4.5"/><path d="M23 15.5l5 2.5"/><path d="M18 11l2.5-3H26"/><path d="M10 11h4"/></svg></span>
+                <span class="cat-letter">A</span>
+                <span class="cat-name">Motorcycle</span>
+              </label>
+            </div>
+            <div class="cat">
+              <input type="checkbox" id="cat-b" name="category" value="B" checked />
+              <label for="cat-b">
+                <span class="cat-ico"><svg viewBox="0 0 36 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l2-6 4-3h12l5 4 4 1v4M4 17h28M4 17v-2"/><circle cx="11" cy="19" r="3"/><circle cx="26" cy="19" r="3"/></svg></span>
+                <span class="cat-letter">B</span>
+                <span class="cat-name">Car</span>
+              </label>
+            </div>
+            <div class="cat">
+              <input type="checkbox" id="cat-c" name="category" value="C" />
+              <label for="cat-c">
+                <span class="cat-ico"><svg viewBox="0 0 36 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h17v11H3zM20 11h7l5 5v3H20z"/><circle cx="10" cy="20" r="2.5"/><circle cx="26" cy="20" r="2.5"/></svg></span>
+                <span class="cat-letter">C</span>
+                <span class="cat-name">Truck</span>
+              </label>
+            </div>
+            <div class="cat">
+              <input type="checkbox" id="cat-d" name="category" value="D" />
+              <label for="cat-d">
+                <span class="cat-ico"><svg viewBox="0 0 36 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="28" height="13" rx="2"/><path d="M4 12h28"/><circle cx="11" cy="20" r="2.5"/><circle cx="25" cy="20" r="2.5"/></svg></span>
+                <span class="cat-letter">D</span>
+                <span class="cat-name">Bus</span>
+              </label>
+            </div>
+            <div class="cat">
+              <input type="checkbox" id="cat-e" name="category" value="E" />
+              <label for="cat-e">
+                <span class="cat-ico"><svg viewBox="0 0 36 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16l2-5 3-2h8l3 3M2 16h16M2 16v-2"/><circle cx="8" cy="18" r="2.5"/><rect x="22" y="10" width="12" height="8"/><circle cx="28" cy="20" r="2"/></svg></span>
+                <span class="cat-letter">E</span>
+                <span class="cat-name">With trailer</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- format -->
+        <section class="form-section">
+          <div class="fieldset-head">
+            <span class="fs-num">4</span>
+            <h2>Choose your format</h2>
+          </div>
+          <p class="fieldset-sub">Every format is covered by our 100% money-back guarantee and free replacements.</p>
+
+          <div class="format-block">
+            <div class="valid-tabs" role="radiogroup" aria-label="Validity period">
+              <button type="button" class="valid-tab active" data-valid="1" data-year="2027"><b>1 Year</b><span>Expires 2027</span></button>
+              <button type="button" class="valid-tab" data-valid="2" data-year="2028"><b>2 Years</b><span>Expires 2028</span></button>
+              <button type="button" class="valid-tab" data-valid="3" data-year="2029"><b>3 Years</b><span>Expires 2029</span></button>
+            </div>
+
+            <div class="plan-grid">
+              <label class="plan" data-plan="physical" data-base="99" data-was="129">
+                <input type="radio" name="format" value="physical" />
+                <span class="plan-check" aria-hidden="true"></span>
+                <span class="plan-rec">Recommended</span>
+                <span class="plan-name">Print + Digital</span>
+                <span class="plan-tag">Booklet, pocket card &amp; digital — total peace of mind.</span>
+                <span class="plan-price">
+                  <span class="plan-now" data-now>$99</span>
+                  <span class="plan-was" data-was-el>$129</span>
+                  <span class="plan-save">Save 23%</span>
+                </span>
+              </label>
+
+              <label class="plan is-active" data-plan="digital" data-base="49" data-was="64">
+                <input type="radio" name="format" value="digital" checked />
+                <span class="plan-check" aria-hidden="true"></span>
+                <span class="plan-name">Digital Only</span>
+                <span class="plan-tag">Instant PDF to your inbox — ready in minutes.</span>
+                <span class="plan-price">
+                  <span class="plan-now" data-now>$49</span>
+                  <span class="plan-was" data-was-el>$64</span>
+                  <span class="plan-save">Save 23%</span>
+                </span>
+              </label>
+            </div>
+
+            <ul class="format-feats" data-feats>
+              <!-- filled by JS based on selected format -->
+            </ul>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ============ RIGHT: LIVE PREVIEW + SUMMARY ============ -->
+      <div class="preview-col">
+
+        <!-- live document preview -->
+        <div class="preview-card">
+          <span class="pc-aura" aria-hidden="true"></span>
+          <span class="pc-grid" aria-hidden="true"></span>
+
+          <div class="preview-head">
+            <span class="ph-label"><span class="live" aria-hidden="true"></span>Live preview</span>
+            <span class="ph-fmt" data-fmt-label>Digital Only</span>
+          </div>
+
+          <div class="preview-stage">
+            <img id="preview-img" src="IMAGES/digital-international-driving-permit-on-phone.webp" alt="Preview of your International Driving Permit" title="Digital International Driving Permit on a smartphone" width="1024" height="1536" decoding="async" />
+          </div>
+
+          <div class="preview-meta">
+            <div class="pm-row">
+              <span class="pm-k">Holder</span>
+              <span class="pm-v placeholder" data-pm-name>Your name appears here</span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-k">Issued for</span>
+              <span class="pm-v" data-pm-country><span class="pm-flag">🇹🇭</span>Thailand</span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-k">Category · Valid until</span>
+              <span class="pm-v"><span data-pm-cat>B</span> · <span data-pm-valid>2029</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- order summary -->
+        <div class="summary-card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18l-1.5 11a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 6Z"/><path d="M3 6 2 3M8 11h8"/></svg>
+            Order summary
+          </h3>
+
+          <div class="sum-line">
+            <span class="sl-k">
+              <span data-sum-fmt>Digital Only IDP</span>
+              <small data-sum-valid>3-year validity · Expires 2029</small>
+            </span>
+            <span class="sl-v" data-sum-base>$64</span>
+          </div>
+          <div class="sum-line sum-disc">
+            <span class="sl-k">Launch discount (23%)</span>
+            <span class="sl-v" data-sum-disc>−$15</span>
+          </div>
+          <div class="sum-line sum-companion" id="sum-companion-line" hidden>
+            <span class="sl-k">
+              <span data-sum-comp-name>Travel companion</span>
+              <small class="comp-save" data-sum-comp-save>You saved $10</small>
+            </span>
+            <span class="sl-v" data-sum-comp-total>$39</span>
+          </div>
+          <div class="sum-line">
+            <span class="sl-k">Processing &amp; delivery</span>
+            <span class="sl-v" style="color:var(--ok);font-weight:850;">Free</span>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="sum-total">
+            <span class="st-k">Total due today</span>
+            <span class="st-v"><small>$</small><span data-sum-total>79</span> <small>USD</small></span>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submit-btn">
+            <span data-btn-text>Continue to photo upload</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+
+          <div class="trust-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            256-bit encrypted · You won't be charged until step 3
+          </div>
+
+          <div class="pay-strip" aria-label="Accepted payment methods">
+            <span class="pay-chip"><span class="pc-visa">VISA</span></span>
+            <span class="pay-chip"><span class="pc-mc"><span class="a"></span><span class="b"></span></span></span>
+            <span class="pay-chip"><span class="pc-amex">AMEX</span></span>
+            <span class="pay-chip">Pay</span>
+            <span class="pay-chip"><span class="pc-pp1">Pay</span><span class="pc-pp2">Pal</span></span>
+          </div>
+
+          <div class="guarantee">
+            <span class="g-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <p><b>100% money-back guarantee.</b> Drive stress-free with lifetime free replacements on every order.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    </form>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="mini-footer">
+    <div class="mf-brand">
+      <img src="IMAGES/firstidp-international-driving-permit-logo.webp" alt="FirstIDP" title="FirstIDP international driving permit logo" width="1500" height="540" decoding="async" />
+      <span>© 2026 FIRSTIDP INTERNATIONAL LLC. All rights reserved.</span>
+    </div>
+    <nav class="mf-links" aria-label="Legal">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-of-service.html">Terms of Service</a>
+      <a href="#">Refund Policy</a>
+      <a href="contact-us.html">Contact us</a>
+    </nav>
+  </footer>
+
+  <!-- processing overlay -->
+  <div class="processing-overlay" id="overlay" aria-hidden="true">
+    <div class="po-card" role="status">
+      <div class="po-spinner" aria-hidden="true"></div>
+      <h3>Saving your details…</h3>
+      <p>Taking you to the photo upload step.</p>
+    </div>
+  </div>
+
+  <script src="checkout.js" defer></script>
+  <script src="/analytics-beacon.js" defer></script>
+</body>
+</html>
