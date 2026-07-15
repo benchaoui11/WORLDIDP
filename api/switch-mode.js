@@ -47,7 +47,36 @@ export default async function handler(request) {
       console.error('[switch-mode] auth check failed:', err.message);
       return json({ error: 'Could not verify session: ' + err.message }, 502);
     }
-    const adminEmail = user?.email || 'unknown-admin';
+    const adminEmail = user?.email || '';
+
+    // 1b) Verify that user is actually an ADMIN, not just *some* logged-in
+    //     user. This check is NOT optional: every Supabase project accepts
+    //     signups with the public anon key by default, so "has a session"
+    //     proves nothing — anyone could have made themselves an account.
+    //     RLS can't save us here either, because every request below is sent
+    //     with the service role key, which bypasses RLS entirely. The
+    //     allowlist has to be enforced right here, explicitly.
+    try {
+      const adminRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/admin_users?select=email&email=eq.${encodeURIComponent(
+          (adminEmail || '').toLowerCase()
+        )}`,
+        { headers: authHeaders() }
+      );
+      if (!adminRes.ok) {
+        console.error('[switch-mode] admin lookup failed:', adminRes.status);
+        return json({ error: 'Could not verify admin access' }, 502);
+      }
+      const adminRows = await adminRes.json();
+      if (!Array.isArray(adminRows) || adminRows.length === 0) {
+        console.warn('[switch-mode] REJECTED non-admin user:', adminEmail);
+        return json({ error: 'Not authorized' }, 403);
+      }
+    } catch (err) {
+      console.error('[switch-mode] admin check failed:', err.message);
+      // Fail CLOSED: if we can't prove the caller is an admin, refuse.
+      return json({ error: 'Could not verify admin access: ' + err.message }, 502);
+    }
 
     // 2) Validate the requested mode.
     let body;
