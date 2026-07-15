@@ -47,7 +47,7 @@ function _getClient() {
     };
     if (window.supabase && window.supabase.createClient) return start();
     const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2";
     s.onload = start;
     s.onerror = () => reject(new Error("Failed to load Supabase client"));
     document.head.appendChild(s);
