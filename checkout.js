@@ -452,6 +452,15 @@
       }
     } catch (err) { /* sessionStorage may be unavailable */ }
 
+    // Checkout details are done — the customer is on their way to the photo
+    // upload step. No personal data in the event, only order shape.
+    window.fidpTrack?.("checkout_completed", {
+      format: state.format,
+      valid_years: state.validYears,
+      country: state.country || null,
+      has_companion: companionAdded,
+    });
+
     const params = new URLSearchParams();
     params.set("format", state.format);
     params.set("valid", String(state.validYears));

@@ -186,6 +186,11 @@
       img.src = dataUrl;
       if (fname) fname.textContent = name;
 
+      // Which of the required photos got added, and when. This is what
+      // shows whether people stall on the selfie vs the licence back.
+      // The photo itself is never sent here — only which slot was filled.
+      window.fidpTrack?.("photo_added", { slot: key });
+
       // brief "processing" scan, then reveal verified state
       zone.classList.add("is-processing");
       setTimeout(() => {
@@ -554,7 +559,21 @@
     // No payment is collected here — the team reviews the documents first
     // and sends secure payment instructions afterward.
     const res = await window.worldidpSubmitOrder(full);
-    if (!res.ok) { showError(res.error); return; }
+    if (!res.ok) {
+      // Track the failure. This is the one funnel step pageviews can't show:
+      // the customer stays on this page, so in PostHog it just looks like
+      // they wandered off. No personal data here — only the fact it failed.
+      window.fidpTrack?.("submit_failed", {
+        format: full.format,
+        has_companion: hasCompanion,
+      });
+      showError(res.error);
+      return;
+    }
+    window.fidpTrack?.("submit_succeeded", {
+      format: full.format,
+      has_companion: hasCompanion,
+    });
 
     const refs = [order.ref];
     if (hasCompanion) {
