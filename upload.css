@@ -454,3 +454,15 @@ ul{margin:0;padding:0;list-style:none;}
 .pb-text{ font-size:.86rem; color:var(--blue-950); }
 .pb-text b{ font-weight:800; }
 .pb-text span{ color:var(--muted,#6b7488); }
+
+/* ─────────────────────────────────────────────────────────────────
+   Make `hidden` actually hide — see the same note in checkout.css.
+
+   `.person-banner { display: flex }` above was outranking the browser's
+   `[hidden] { display: none }`, so the banner stayed on screen for every
+   customer, reading "Now uploading documents for your travel companion
+   — step 2 of 2" even on a one-person order. initPersonBanner() has no
+   final `else`, so on a solo order it never touches the element at all
+   and the markup's own `hidden` was the only thing meant to hide it.
+   ───────────────────────────────────────────────────────────────── */
+.person-banner[hidden] { display: none; }

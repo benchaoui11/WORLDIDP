@@ -568,3 +568,25 @@ ul{margin:0;padding:0;list-style:none;}
 /* ---- order summary: companion line item ---- */
 .sum-line.sum-companion .sl-k{ display:flex; flex-direction:column; }
 .sum-line.sum-companion .sl-k small.comp-save{ color:var(--ok); font-weight:800; }
+
+/* ─────────────────────────────────────────────────────────────────
+   Make `hidden` actually hide.
+
+   The HTML `hidden` attribute only works through the browser's own
+   `[hidden] { display: none }` rule — and that lives in the user-agent
+   stylesheet, which ANY normal author rule outranks. So a plain
+   `.some-thing { display: flex }` above silently beats it, and the
+   element stays on screen no matter how many times the JS sets
+   `el.hidden = true`.
+
+   That is exactly what was happening here: `#sum-companion-line` sat
+   visible on every single checkout, showing its hardcoded placeholder
+   text ("Travel companion / You saved $10 / $39") even for customers
+   who never added a companion — while the real total ignored it.
+
+   These selectors are (0,2,0) — class + attribute — so they outrank the
+   plain (0,1,0) rules above without needing !important.
+   ───────────────────────────────────────────────────────────────── */
+.sum-line[hidden],
+.companion-invite[hidden],
+.companion-panel[hidden] { display: none; }
