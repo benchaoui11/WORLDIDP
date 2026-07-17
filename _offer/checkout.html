@@ -183,7 +183,15 @@
 
         <!-- ═══════════ TRAVEL COMPANION (add a second driver, 20% off) ═══════════ -->
         <section class="companion-zone">
-          <div class="companion-invite" id="companion-invite">
+          <!-- Travel companion — HIDDEN ON PURPOSE (owner's call: it was
+               confusing people mid-checkout). The markup stays in the DOM
+               rather than being deleted, because checkout.js still wires up
+               #companion-add-btn and would throw on a null if it vanished,
+               and the DB, /admin and order tracking still handle the older
+               orders that DO have a companion. Nothing here renders while
+               this `hidden` is present.
+               To bring the offer back: delete the `hidden` below. -->
+          <div class="companion-invite" id="companion-invite" hidden>
             <div class="ci-seats" aria-hidden="true">
               <svg viewBox="0 0 64 48" fill="none">
                 <circle cx="18" cy="18" r="9" stroke="currentColor" stroke-width="2.2"/>
@@ -329,8 +337,6 @@
                 <span class="plan-tag">Booklet, pocket card &amp; digital — total peace of mind.</span>
                 <span class="plan-price">
                   <span class="plan-now" data-now>$99</span>
-                  <span class="plan-was" data-was-el>$129</span>
-                  <span class="plan-save">Save 23%</span>
                 </span>
               </label>
 
@@ -341,8 +347,6 @@
                 <span class="plan-tag">Instant PDF to your inbox — ready in minutes.</span>
                 <span class="plan-price">
                   <span class="plan-now" data-now>$49</span>
-                  <span class="plan-was" data-was-el>$64</span>
-                  <span class="plan-save">Save 23%</span>
                 </span>
               </label>
             </div>
@@ -401,10 +405,6 @@
               <small data-sum-valid>3-year validity · Expires 2029</small>
             </span>
             <span class="sl-v" data-sum-base>$64</span>
-          </div>
-          <div class="sum-line sum-disc">
-            <span class="sl-k">Launch discount (23%)</span>
-            <span class="sl-v" data-sum-disc>−$15</span>
           </div>
           <div class="sum-line sum-companion" id="sum-companion-line" hidden>
             <span class="sl-k">
