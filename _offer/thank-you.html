@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-site-mode="offer">
 <head>
+  <script src="/google-tag.js"></script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -170,6 +171,45 @@
       var companion = null, primary = null;
       try { companion = JSON.parse(sessionStorage.getItem('worldidp_companion') || 'null'); } catch (e) {}
       try { primary = JSON.parse(sessionStorage.getItem('worldidp_application') || 'null'); } catch (e) {}
+
+      /* ---- Google Ads conversion -------------------------------------
+         Fires on page load, which is why the ?ref= in the URL is
+         irrelevant — nothing here reads it to decide whether to fire.
+
+         What the ref IS used for: transaction_id. Google dedupes on it,
+         so a customer refreshing this page ten times still counts once.
+         Without it every refresh would be a fresh conversion and the
+         numbers would be fiction.
+
+         Value: the real order price, sent in USD. The Ads account is in
+         MAD, and Google converts at the daily rate — but if we let it
+         default, "49" would be read as 49 dirhams (~$5) and every lead
+         would look almost worthless to the bidding algorithm.
+
+         Express (+$14) isn't included: it's never written to
+         sessionStorage, so this page can't know about it. Under by $14 on
+         some orders, which is fine for a lead-value signal.
+
+         This is a LEAD, not a sale — the customer hasn't paid yet.
+         ---------------------------------------------------------------- */
+      try {
+        var PRICES = { digital: { 1: 49, 2: 55, 3: 59 }, physical: { 1: 79, 2: 89, 3: 99 } };
+        var table = PRICES[primary && primary.format] || PRICES.digital;
+        var value = table[primary && primary.validYears] || 49;
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'conversion', {
+            'send_to': 'AW-11043881603/29SbCODwltIcEIOFkZIp',
+            'value': value,
+            'currency': 'USD',
+            'transaction_id': refs[0] || ''
+          });
+        }
+      } catch (e) {
+        // Analytics must never break the confirmation page. The customer
+        // seeing their tracking number matters more than we do.
+        console.warn('[FirstIDP] conversion tracking failed:', e);
+      }
 
       var routeSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h16M12 6l6 6-6 6"/></svg>';
       var copySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg>';
