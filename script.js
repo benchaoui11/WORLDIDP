@@ -441,7 +441,6 @@ if (logoTrack) {
     digital:  { 1: 49, 2: 55, 3: 59 },
     physical: { 1: 79, 2: 89, 3: 99 },
   };
-  const wasOf = (n) => Math.round(n / 0.77);
 
   function cardFormat(card) {
     if (card.dataset.format) return card.dataset.format;
@@ -456,9 +455,7 @@ if (logoTrack) {
       const table = PRICES[cardFormat(card)] || PRICES.digital;
       const now = table[years] != null ? table[years] : table[3];
       const a = card.querySelector(".pc-amount");
-      const w = card.querySelector(".pc-was");
       if (a) a.textContent = `$${now}`;
-      if (w) w.textContent = `$${wasOf(now)}`;
     });
   }
 

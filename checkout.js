@@ -110,7 +110,6 @@
   const sumFmt       = $("[data-sum-fmt]");
   const sumValid     = $("[data-sum-valid]");
   const sumBase      = $("[data-sum-base]");
-  const sumDisc      = $("[data-sum-disc]");
   const sumTotal     = $("[data-sum-total]");
   const featsList    = $("[data-feats]");
 
@@ -164,14 +163,15 @@
 
   function recalc() {
     const total = priceFor(state.format, state.validYears);
-    const was = Math.round(total / 0.77); // reverse the 23% discount for the strikethrough
-    const disc = was - total;
     const info = FORMAT_INFO[state.format];
 
     sumFmt.textContent  = info.sumName;
     sumValid.textContent = `${state.validYears}-year validity · Expires ${state.validUntil}`;
-    sumBase.textContent = `$${was}`;
-    sumDisc.textContent = `−$${disc}`;
+    // The real price. This line used to show an inflated "was" figure with
+    // a "Launch discount (23%)" row underneath cancelling it out. Both are
+    // gone, so it has to be the actual number or the line item and the
+    // total would contradict each other.
+    sumBase.textContent = `$${total}`;
 
     let grandTotal = total;
 
@@ -198,9 +198,7 @@
     $$(".plan").forEach((p) => {
       const fmt = p.dataset.plan;
       const now = priceFor(fmt, state.validYears);
-      const w = Math.round(now / 0.77);
       $("[data-now]", p).textContent = `$${now}`;
-      $("[data-was-el]", p).textContent = `$${w}`;
     });
   }
 
@@ -507,14 +505,11 @@
     recalc();
   }
 
-  // If the customer chose Digital, hide the Print + Digital upsell (keep validity choice)
-  if (qpFormat !== "physical") {
-    const physicalPlan = document.querySelector('.plan[data-plan="physical"]');
-    if (physicalPlan) physicalPlan.style.display = "none";
-    document.querySelector('.plan-grid')?.classList.add('single-plan');
-    const fmtHead = document.querySelector('.form-section h2');
-    // keep heading; only the plan choice is removed
-  }
+  // Both formats stay visible no matter which one the customer arrived
+  // with. Picking "Digital Only" on the pricing page used to hide the
+  // Print + Digital card here entirely, so anyone who wanted to upgrade
+  // had to go back and start over — they had no way to change their mind
+  // at the one moment they're actually thinking about it.
   updateCountry();
   updateName();
   pmCat.textContent = state.category;
