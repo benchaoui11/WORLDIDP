@@ -212,6 +212,12 @@ window.worldidpSendConfirmationEmail = async function (payload) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      // keepalive lets this request finish even if the page navigates away
+      // a moment later. Without it, the redirect to thank-you.html kills the
+      // in-flight fetch before it reaches the server, and no email is ever
+      // sent — which is exactly what was happening: the order saved (that
+      // call is awaited) but the confirmation email silently vanished.
+      keepalive: true,
     });
   } catch (e) {
     console.error("[FirstIDP] confirmation email failed (non-blocking):", e);
@@ -226,6 +232,7 @@ window.worldidpSendAdminNotification = async function (payload) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      keepalive: true, // survive the redirect — see note on the confirmation email above
     });
   } catch (e) {
     console.error("[FirstIDP] admin notification failed (non-blocking):", e);

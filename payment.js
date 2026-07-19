@@ -256,9 +256,11 @@
       }
     } catch (e) { console.error("[FirstIDP] companion submit failed:", e); }
 
-    // Fire-and-forget: never let a slow/failed email delay the redirect —
-    // the application is already safely saved by this point.
-    window.worldidpSendConfirmationEmail({
+    // Await both emails before navigating — see the detailed note in
+    // upload.js. keepalive keeps them alive across the redirect, but they
+    // must actually be started first, and firing-then-redirecting was
+    // killing them in flight. Errors are swallowed inside each helper.
+    await window.worldidpSendConfirmationEmail({
       to: payload.email,
       firstName: payload.firstName,
       refs,
@@ -268,7 +270,7 @@
       companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").firstName) : null,
     });
 
-    window.worldidpSendAdminNotification({
+    await window.worldidpSendAdminNotification({
       refs,
       orderNumber: res.orderNumber,
       firstName: payload.firstName,
