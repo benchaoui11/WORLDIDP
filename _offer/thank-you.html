@@ -211,6 +211,19 @@
         console.warn('[FirstIDP] conversion tracking failed:', e);
       }
 
+      // PostHog's funnel stopped at submit_succeeded (fired on upload-photos
+      // or payment.html) with no confirmation the customer actually reached
+      // this page — refreshes, redirects, or a slow network in between were
+      // invisible. This closes that gap with the same ref used above.
+      try {
+        window.fidpTrack?.('purchase_confirmed', {
+          format: (primary && primary.format) || null,
+          has_companion: refs.length > 1,
+        });
+      } catch (e) {
+        console.warn('[FirstIDP] purchase_confirmed tracking failed:', e);
+      }
+
       var routeSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h16M12 6l6 6-6 6"/></svg>';
       var copySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg>';
 
