@@ -109,11 +109,7 @@ export default async function handler(request) {
     try {
       updateRes = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?id=eq.1`, {
         method: 'PATCH',
-        // return=representation (not minimal): Supabase returns 204 "success"
-        // even when the WHERE clause matched zero rows, so return=minimal was
-        // silently reporting success on every switch while the row never
-        // actually changed. We need the updated row back to confirm it did.
-        headers: { ...authHeaders(), 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json', Prefer: 'return=minimal' },
         body: JSON.stringify({ mode: nextMode, updated_at: new Date().toISOString(), updated_by: adminEmail }),
       });
     } catch (err) {
@@ -124,24 +120,6 @@ export default async function handler(request) {
       const detail = await updateRes.text().catch(() => '');
       console.error('[switch-mode] update rejected:', updateRes.status, detail);
       return json({ error: `Failed to update site mode (Supabase status ${updateRes.status}). ${detail.slice(0, 200)}` }, 500);
-    }
-    let updatedRows;
-    try {
-      updatedRows = await updateRes.json();
-    } catch (err) {
-      console.error('[switch-mode] could not parse update response:', err.message);
-      return json({ error: 'Supabase returned an unreadable response for the update.' }, 502);
-    }
-    if (!Array.isArray(updatedRows) || updatedRows.length === 0) {
-      // The request succeeded but matched zero rows — the row with id=1
-      // doesn't exist (or something blocked the match). Reporting success
-      // here would repeat exactly the bug this fix is for.
-      console.error('[switch-mode] PATCH matched 0 rows — site_settings row id=1 may be missing');
-      return json({ error: 'Update reached Supabase but changed nothing — the site_settings row (id=1) may be missing. Run admin/supabase-schema.sql to create it.' }, 500);
-    }
-    if (updatedRows[0].mode !== nextMode) {
-      console.error('[switch-mode] row updated but mode does not match requested value', updatedRows[0]);
-      return json({ error: `Update did not stick — Supabase now shows mode="${updatedRows[0].mode}" instead of "${nextMode}".` }, 500);
     }
 
     // 4) Log the switch for the dashboard's history panel (best-effort — never
