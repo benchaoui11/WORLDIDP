@@ -218,16 +218,6 @@ countryCombos.forEach((combo) => {
     eligibilityForm?.querySelector(".btn-apply")?.classList.remove("is-success");
     const applyText = eligibilityForm?.querySelector("[data-apply-text]");
     if (applyText) applyText.textContent = "Check My Route";
-    // Restore the shield icon too — otherwise it stays as the arrow from a
-    // previous "Continue to Checkout" state even though the button text
-    // and color have reset to the initial "check my route" state.
-    const applyIcon = eligibilityForm?.querySelector(".btn-apply svg");
-    if (applyIcon && applyIcon.classList.contains("arrow-icon")) {
-      applyIcon.outerHTML = `<svg class="shield-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2.2 4.4 5.1c-.5.2-.8.6-.8 1.1v5.2c0 4.5 2.9 8.5 7.2 10.2.8.3 1.6.3 2.4 0 4.3-1.7 7.2-5.7 7.2-10.2V6.2c0-.5-.3-.9-.8-1.1L12 2.2Z" fill="currentColor"/>
-        <path d="m8.6 12.2 2.3 2.3 4.5-4.7" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-    }
     combo.classList.remove("is-open");
     trigger.setAttribute("aria-expanded", "false");
     trigger.focus();
@@ -268,28 +258,9 @@ eligibilityForm?.addEventListener("submit", (event) => {
   eligibilityResult?.classList.remove("is-visible");
 
   window.setTimeout(() => {
-    text.textContent = "Continue to Checkout";
+    text.textContent = "Continue Application";
     button.classList.remove("is-submitted");
     button.classList.add("is-success");
-
-    window.fidpTrack?.("route_checked", {
-      destination: destination !== "your destination" ? destination : null,
-      issued_country: issued !== "your country" ? issued : null,
-      requires_printed: printedRequired.has(destination),
-    });
-
-    // The icon changes from a shield (verification) to an arrow (proceed),
-    // so the button visually says "click me to go forward" instead of
-    // looking like the same confirmation state as before. Customers were
-    // reading "Continue to Checkout" but not realizing this exact button
-    // needed a second click to reach checkout.
-    const icon = button.querySelector("svg");
-    if (icon) {
-      icon.outerHTML = `<svg class="shield-icon arrow-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M5 12h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="m13 6 6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-    }
     if (resultText) {
       resultText.textContent = printedRequired.has(destination)
         ? `You're all set for ${destination}. ${destination} requires a printed IDP — choose Print + Digital.`

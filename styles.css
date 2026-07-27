@@ -679,22 +679,6 @@ select {
 .btn-apply.is-success {
   background: linear-gradient(135deg, #078d35, #14c957);
   box-shadow: 0 18px 36px rgba(20, 201, 87, 0.28);
-  animation: btn-apply-pulse 1.6s ease-out 2;
-}
-
-@keyframes btn-apply-pulse {
-  0%   { box-shadow: 0 18px 36px rgba(20, 201, 87, 0.28), 0 0 0 0 rgba(20, 201, 87, 0.45); }
-  70%  { box-shadow: 0 18px 36px rgba(20, 201, 87, 0.28), 0 0 0 14px rgba(20, 201, 87, 0); }
-  100% { box-shadow: 0 18px 36px rgba(20, 201, 87, 0.28), 0 0 0 0 rgba(20, 201, 87, 0); }
-}
-
-.arrow-icon {
-  animation: arrow-nudge 1.4s ease-in-out infinite;
-}
-
-@keyframes arrow-nudge {
-  0%, 100% { transform: translateX(0); }
-  50%      { transform: translateX(3px); }
 }
 
 .shield-icon {
@@ -3643,7 +3627,7 @@ h1 {
   gap: 14px;
 }
 
-.country-search-panel {
+.country-search {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3657,18 +3641,18 @@ h1 {
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.country-search-panel:focus-within {
+.country-search:focus-within {
   border-color: var(--blue-600);
   box-shadow: 0 0 0 4px rgba(36, 86, 230, 0.12);
 }
 
-.country-search-panel svg {
+.country-search svg {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
 
-.country-search-panel input {
+.country-search input {
   width: 100%;
   border: 0;
   background: transparent;
@@ -3679,7 +3663,7 @@ h1 {
   outline: none;
 }
 
-.country-search-panel input::placeholder {
+.country-search input::placeholder {
   color: #9aa6bd;
   font-weight: 500;
 }
@@ -4711,9 +4695,9 @@ h1 {
   .application-card h2 { font-size: 1.42rem !important; line-height: 1.2 !important; }
 }
 
-/* FIX: country-search-panel giant-height bug on mobile (flex-basis became height in column) */
+/* FIX: country-search giant-height bug on mobile (flex-basis became height in column) */
 @media (max-width: 620px) {
-  .country-search-panel { flex: 0 0 auto !important; min-height: 52px !important; width: 100% !important; }
+  .country-search { flex: 0 0 auto !important; min-height: 52px !important; width: 100% !important; }
 }
 
 /* [1] Homepage region chips: smooth touch scroll + edge fade hint */

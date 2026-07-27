@@ -222,16 +222,7 @@
     // No payment is collected here — the team reviews the documents first
     // and sends secure payment instructions afterward.
     const res = await window.worldidpSubmitOrder(payload);
-    if (!res.ok) {
-      // Track the failure — this is the one funnel step pageviews can't
-      // show, and until now the entire Print + Digital path had zero
-      // PostHog coverage, unlike the Digital-only path in upload.js.
-      window.fidpTrack?.("submit_failed", {
-        format: payload.format,
-        has_companion: !!JSON.parse(sessionStorage.getItem("worldidp_companion") || "null"),
-      });
-      showError(res.error); return;
-    }
+    if (!res.ok) { showError(res.error); return; }
 
     // Travel companion — submit their own linked application, if one was added at checkout.
     // Same trip, same package, same shipping address (if Print + Digital) — only
@@ -264,11 +255,6 @@
         }
       }
     } catch (e) { console.error("[FirstIDP] companion submit failed:", e); }
-
-    window.fidpTrack?.("submit_succeeded", {
-      format: payload.format,
-      has_companion: refs.length > 1,
-    });
 
     // Await both emails before navigating — see the detailed note in
     // upload.js. keepalive keeps them alive across the redirect, but they

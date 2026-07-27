@@ -388,8 +388,7 @@ ul{margin:0;padding:0;list-style:none;}
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:1080px){
   .flow-grid{grid-template-columns:1fr;}
-  .upload-card{order:0;}
-  .status-col{position:static;order:1;}
+  .status-col{position:static;order:-1;}
 }
 @media (max-width:860px){
   :root{--container:min(680px, calc(100vw - 32px));}
