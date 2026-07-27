@@ -484,6 +484,12 @@
   const qpDest = params.get("destination-country");
   if (qpDest && byName(qpDest)) {
     residenceSel.value = qpDest;
+    // Setting .value directly does NOT fire a "change" event, so
+    // updateCountry() — which also syncs the phone country code — never ran
+    // for anyone arriving here with a destination already picked on the
+    // homepage. That's why the phone code stayed on its default instead of
+    // matching the country they were actually planning to drive in.
+    updateCountry();
   }
 
   /* ---------- init ---------- */
