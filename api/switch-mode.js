@@ -143,7 +143,6 @@ export default async function handler(request) {
       console.error('[switch-mode] row updated but mode does not match requested value', updatedRows[0]);
       return json({ error: `Update did not stick — Supabase now shows mode="${updatedRows[0].mode}" instead of "${nextMode}".` }, 500);
     }
-    }
 
     // 4) Log the switch for the dashboard's history panel (best-effort — never
     //    fail the whole switch just because the log insert had trouble).
