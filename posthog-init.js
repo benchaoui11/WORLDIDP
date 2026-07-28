@@ -3,27 +3,13 @@
 
    Only loaded from _offer/*.html, so it never runs on the white page.
 
-   ⚠️  SESSION REPLAY RECORDS EVERYTHING. NOTHING IS MASKED. ⚠️
+   SECURITY UPDATE — 2026-07-28:
+   Session Replay is disabled completely. Event analytics stays enabled,
+   but PostHog must not capture form values, document previews, signature
+   canvas content, uploaded identity images, checkout details, or admin data.
 
-   This was a deliberate, informed choice by the site owner, confirmed
-   twice — do not "fix" it without asking him first.
-
-   What the replays contain, as readable content on PostHog's US servers:
-     • full name, date of birth, country of birth, sex
-     • email, phone, full delivery address
-     • the customer's selfie
-     • both sides of their driving licence
-     • their handwritten signature
-
-   That is a complete identity kit plus photo ID. A PostHog login is now
-   worth as much to an attacker as the /admin login or the database itself.
-   Put 2FA on the PostHog account and don't share the login.
-
-   To make replays privacy-safe again, add these three lines back into
-   session_recording below:
-       maskAllInputs: true,
-       maskTextSelector: '*',
-       blockSelector: '.dropzone, .dz-preview, .sig-preview, #sig-canvas',
+   Historical recordings already stored in PostHog are not deleted by this
+   code change. Review and remove them manually from PostHog if needed.
    ========================================================================= */
 
 (function () {
@@ -39,19 +25,11 @@
     // identify(), so in practice no profiles get created at all.
     person_profiles: 'identified_only',
 
+    disable_session_recording: true,
     session_recording: {
-      // Record what the customer actually types. PostHog masks inputs by
-      // default, so this has to be turned OFF explicitly. Owner's decision,
-      // made knowingly — see the header comment.
-      maskAllInputs: false,
-
-      // maskTextSelector is deliberately not set, so ordinary page text
-      // (the order recap: name, email, phone, address) records as-is too.
-
-      // blockSelector is deliberately not set either. That means the selfie
-      // and both sides of the driving licence appear in the replay as well.
-      // This was asked for explicitly and confirmed twice. It is not an
-      // oversight — do not "add the masking back" without asking the owner.
+      maskAllInputs: true,
+      maskTextSelector: '*',
+      blockSelector: '.dropzone, .dz-preview, .sig-preview, #sig-canvas, input, textarea, select, canvas, img',
     },
   });
 })();

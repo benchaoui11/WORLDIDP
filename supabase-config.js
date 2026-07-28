@@ -15,6 +15,7 @@
 window.WORLDIDP_SUPABASE = {
   SUPABASE_URL:      "https://ebxgcjijbjyttojqvgeb.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_uk7y1xctBGgPjYJJ5LxfLg_OQGrxpG_",
+  SITE_ID:           "f1f5c0de-0001-4b44-8a1d-000000000001",
 
   // Names you create in Supabase (keep these defaults unless you change them):
   TABLE:  "applications",   // database table that stores each order
@@ -124,6 +125,7 @@ window.worldidpSubmitOrder = async function (order) {
     const row = {
       ref,
       status: "submitted",
+      site_id: cfg.SITE_ID,
       format: order.format || null,
       validity_years: order.validYears || null,
       destination_country: order.country || null,
