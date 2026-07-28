@@ -154,6 +154,8 @@ export default async function handler(req, res) {
   const mode = await getMode();
 
   res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
 
   if (mode === 'maintenance') {
     res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8');
