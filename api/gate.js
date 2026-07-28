@@ -153,7 +153,22 @@ export default async function handler(req, res) {
 
   const mode = await getMode();
 
+  // Three separate cache layers exist between this function and the
+  // visitor's browser: the browser itself, Vercel's Edge/CDN cache, and
+  // potentially another CDN in front of that. `Cache-Control` alone only
+  // reliably covers the browser — Vercel's Edge Network is documented to
+  // cache responses independently unless told not to via CDN-Cache-Control,
+  // which is very likely why switching Offer/White in Supabase wasn't
+  // showing up live: the edge kept serving whatever it had cached from
+  // before the switch, regardless of what mode getMode() now returns.
   res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store, must-revalidate');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store, must-revalidate');
+  // TEMPORARY DIAGNOSTIC — remove once the offer/white switching issue is
+  // confirmed fixed. Lets us see in the browser's Network tab whether this
+  // function actually ran, and what mode it read, without needing to guess.
+  res.setHeader('X-FirstIDP-Gate-Mode', String(mode));
+  res.setHeader('X-FirstIDP-Gate-Path', pathname);
 
   if (mode === 'maintenance') {
     res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8');
