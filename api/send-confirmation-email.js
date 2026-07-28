@@ -12,7 +12,7 @@
 export const config = { runtime: 'edge' };
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = 'FirstIDP <contact@firstidp.com>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'contact@firstidp.com';
 
 export default async function handler(request) {
   if (request.method !== 'POST') {

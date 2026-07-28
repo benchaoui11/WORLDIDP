@@ -12,7 +12,7 @@
 export const config = { runtime: 'edge' };
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = 'FirstIDP Orders <contact@firstidp.com>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'contact@firstidp.com';
 // Change this to any inbox you actually check — no code changes needed.
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'contact@firstidp.com';
 

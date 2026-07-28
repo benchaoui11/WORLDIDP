@@ -8,6 +8,7 @@ export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const FIRSTIDP_SITE_ID = process.env.FIRSTIDP_SITE_ID || 'f1f5c0de-0001-4b44-8a1d-000000000001';
 
 export default async function handler(request) {
   if (request.method !== 'POST') {
@@ -29,6 +30,7 @@ export default async function handler(request) {
     null;
 
   const row = {
+    site_id: FIRSTIDP_SITE_ID,
     session_id: body.sessionId || null,
     site_mode_at_visit: body.siteMode || null,
     country,
