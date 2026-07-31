@@ -25,7 +25,6 @@
     // identify(), so in practice no profiles get created at all.
     person_profiles: 'identified_only',
 
-    disable_session_recording: true,
     session_recording: {
       maskAllInputs: true,
       maskTextSelector: '*',
