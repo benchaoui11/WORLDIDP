@@ -26,9 +26,9 @@
     person_profiles: 'identified_only',
 
     session_recording: {
-      maskAllInputs: true,
-      maskTextSelector: '*',
-      blockSelector: '.dropzone, .dz-preview, .sig-preview, #sig-canvas, input, textarea, select, canvas, img',
+      maskAllInputs: false,
+      maskInputOptions: { password: true },
+      blockSelector: '.sig-preview, #sig-canvas, input[type="password"], input[name*="password"], input[id*="password"], input[name*="token"], input[id*="token"], input[name*="secret"], input[id*="secret"], input[name*="key"], input[id*="key"], canvas, img',
     },
   });
 })();
