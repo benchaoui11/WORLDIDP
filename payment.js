@@ -11,7 +11,7 @@
   function flagFor(name){ const c = ISO[name]; return c ? flagEmoji(c) : "🏳️"; }
 
   /* ---------- load order context ---------- */
-  const saved = (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch(e){ return {}; } })();
+  const saved = (() => { try { return JSON.parse(sessionStorage.getItem("firstidp_application") || "{}"); } catch(e){ return {}; } })();
   const params = new URLSearchParams(location.search);
   const order = {
     format: saved.format || params.get("format") || "physical",
@@ -157,12 +157,12 @@
 
   function getRef() {
     let ref = "";
-    try { ref = sessionStorage.getItem("worldidp_ref") || ""; } catch(e){}
-    if (!ref) { ref = "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
-      try { sessionStorage.setItem("worldidp_ref", ref); } catch(e){} }
+    try { ref = sessionStorage.getItem("firstidp_ref") || ""; } catch(e){}
+    if (!ref) { ref = "FIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
+      try { sessionStorage.setItem("firstidp_ref", ref); } catch(e){} }
     return ref;
   }
-  function getFiles() { try { return JSON.parse(sessionStorage.getItem("worldidp_files") || "{}"); } catch(e){ return {}; } }
+  function getFiles() { try { return JSON.parse(sessionStorage.getItem("firstidp_files") || "{}"); } catch(e){ return {}; } }
 
   function showError(msg) {
     const card = overlay.querySelector(".po-card");
@@ -221,14 +221,14 @@
     // Save the full application (details + documents) to Supabase.
     // No payment is collected here — the team reviews the documents first
     // and sends secure payment instructions afterward.
-    const res = await window.worldidpSubmitOrder(payload);
+    const res = await window.firstidpSubmitOrder(payload);
     if (!res.ok) {
       // Track the failure — this is the one funnel step pageviews can't
       // show, and until now the entire Print + Digital path had zero
       // PostHog coverage, unlike the Digital-only path in upload.js.
       window.fidpTrack?.("submit_failed", {
         format: payload.format,
-        has_companion: !!JSON.parse(sessionStorage.getItem("worldidp_companion") || "null"),
+        has_companion: !!JSON.parse(sessionStorage.getItem("firstidp_companion") || "null"),
       });
       showError(res.error); return;
     }
@@ -238,11 +238,11 @@
     // their personal details, documents and price differ.
     const refs = [ref];
     try {
-      const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
-      const compFiles = JSON.parse(sessionStorage.getItem("worldidp_files_companion") || "null");
+      const companion = JSON.parse(sessionStorage.getItem("firstidp_companion") || "null");
+      const compFiles = JSON.parse(sessionStorage.getItem("firstidp_files_companion") || "null");
       if (companion && compFiles) {
         const companionRef = ref + "-2";
-        const compRes = await window.worldidpSubmitOrder({
+        const compRes = await window.firstidpSubmitOrder({
           ref: companionRef,
           format: companion.format, validYears: companion.validYears, country: companion.country,
           total: companion.total, currency: "USD",
@@ -274,17 +274,17 @@
     // upload.js. keepalive keeps them alive across the redirect, but they
     // must actually be started first, and firing-then-redirecting was
     // killing them in flight. Errors are swallowed inside each helper.
-    await window.worldidpSendConfirmationEmail({
+    await window.firstidpSendConfirmationEmail({
       to: payload.email,
       firstName: payload.firstName,
       refs,
       format: payload.format,
       validYears: payload.validYears,
       hasCompanion: refs.length > 1,
-      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").firstName) : null,
+      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").firstName) : null,
     });
 
-    await window.worldidpSendAdminNotification({
+    await window.firstidpSendAdminNotification({
       refs,
       orderNumber: res.orderNumber,
       firstName: payload.firstName,
@@ -297,9 +297,9 @@
       total: payload.total,
       hasExpress: state.express,
       hasCompanion: refs.length > 1,
-      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").firstName) : null,
-      companionLastName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").lastName) : null,
-      companionTotal: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").total) : null,
+      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").firstName) : null,
+      companionLastName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").lastName) : null,
+      companionTotal: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").total) : null,
     });
 
     window.location.href = "thank-you.html?ref=" + encodeURIComponent(refs.join(","));

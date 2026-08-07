@@ -300,7 +300,7 @@ Security finding:
 Current first-party beacon:
 
 - `analytics-beacon.js` fires once per page load.
-- Creates a `widp_sid` in `sessionStorage`.
+- Creates a `fidp_sid` in `sessionStorage`.
 - Captures browser, OS, device, referrer, landing page, and site mode.
 - `api/track.js` adds country from Vercel headers and inserts into `visitors`.
 
@@ -319,13 +319,13 @@ Important wording:
 
 1. Offer page / pricing route sends user to checkout.
 2. `checkout.js` clears old session data and gathers customer identity, product choice, validity, country, license category, phone, and optional companion.
-3. Checkout stores summary in `sessionStorage` as `worldidp_application`.
+3. Checkout stores summary in `sessionStorage` as `firstidp_application`.
 4. User is sent to `upload-photos.html`.
 5. `upload.js` collects selfie, license front, license back, and signature.
 6. Images are compressed client-side and stored in `sessionStorage`.
 7. For Print + Digital, user continues to `payment.html` for delivery address and express processing option.
 8. For Digital, `upload.js` submits directly.
-9. `worldidpSubmitOrder()` uploads documents to Supabase Storage and inserts into `applications`.
+9. `firstidpSubmitOrder()` uploads documents to Supabase Storage and inserts into `applications`.
 10. Optional companion gets a second application row with `group_ref` and `is_companion`.
 11. Customer confirmation and admin notification emails are sent.
 12. User is redirected to `thank-you.html`.
@@ -434,8 +434,8 @@ Medium:
 Low / operational:
 
 1. Local folder is not a Git repo.
-2. Docs mention old WorldIDP/Stripe concepts inconsistent with current FirstIDP behavior.
-3. Some brand/config names still say `WORLDIDP`.
+2. Docs mention old FirstIDP/Stripe concepts inconsistent with current FirstIDP behavior.
+3. Some brand/config names still say `FIRSTIDP`.
 
 ## Reusable Components and Concepts
 

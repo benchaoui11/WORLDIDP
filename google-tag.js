@@ -1,10 +1,10 @@
 /* =========================================================================
    FirstIDP — Google tag (gtag.js)
 
-   Loaded from every _offer/*.html, never from the white page.
+   Loaded from every public FirstIDP page.
 
    Two IDs are configured on purpose:
-     G-1EDDP1521P    — GA4 property (the "Google tag" Google Ads generated)
+     G-63NCNG4MRR    — GA4 property
      AW-11043881603  — Google Ads conversions
 
    The conversion itself fires from thank-you.html, not here.
@@ -14,7 +14,7 @@ window.dataLayer = window.dataLayer || [];
 function gtag() { dataLayer.push(arguments); }
 
 gtag('js', new Date());
-gtag('config', 'G-1EDDP1521P');
+gtag('config', 'G-63NCNG4MRR');
 
 // Configuring the Ads ID explicitly. The G- tag usually carries Ads
 // conversions on its own once the accounts are linked, but "usually" is not
@@ -22,14 +22,23 @@ gtag('config', 'G-1EDDP1521P');
 // line makes the AW destination unconditional.
 gtag('config', 'AW-11043881603');
 
-// Load the real library. Kept as a plain injected <script async> rather than
-// the copy-pasted inline snippet so there's exactly one place to change the
-// IDs instead of 22 copies across the site.
+// Load the real library after the browser has had a chance to paint the page.
+// Calls above are queued in dataLayer, so pageview/conversion data is preserved
+// without making Google Tag part of the critical render path.
 (function () {
-  var s = document.createElement('script');
-  s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-1EDDP1521P';
-  var first = document.getElementsByTagName('script')[0];
-  if (first && first.parentNode) first.parentNode.insertBefore(s, first);
-  else document.head.appendChild(s);
+  var loaded = false;
+  function loadTag() {
+    if (loaded) return;
+    loaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-63NCNG4MRR';
+    document.head.appendChild(s);
+  }
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(loadTag, { timeout: 2500 });
+  } else {
+    window.addEventListener('load', function () { setTimeout(loadTag, 600); }, { once: true });
+  }
 })();

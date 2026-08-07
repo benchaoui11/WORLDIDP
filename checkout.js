@@ -12,9 +12,9 @@
   // upload/payment page — never revisiting checkout.html — are
   // unaffected, since they don't re-run this.
   try {
-    sessionStorage.removeItem("worldidp_ref");
-    sessionStorage.removeItem("worldidp_application");
-    sessionStorage.removeItem("worldidp_files");
+    sessionStorage.removeItem("firstidp_ref");
+    sessionStorage.removeItem("firstidp_application");
+    sessionStorage.removeItem("firstidp_files");
   } catch (e) { /* sessionStorage may be unavailable */ }
 
   /* ---------- helpers ---------- */
@@ -429,7 +429,7 @@
         email: $("#email").value.trim(),
         phone: $("#phone").value.trim(),
       };
-      sessionStorage.setItem("worldidp_application", JSON.stringify(summary));
+      sessionStorage.setItem("firstidp_application", JSON.stringify(summary));
 
       // Travel companion — same trip, same package, their own info + documents.
       if (companionAdded) {
@@ -444,9 +444,9 @@
           country: state.country,
           total: companionPriceFor(state.format, state.validYears),
         };
-        sessionStorage.setItem("worldidp_companion", JSON.stringify(companion));
+        sessionStorage.setItem("firstidp_companion", JSON.stringify(companion));
       } else {
-        sessionStorage.removeItem("worldidp_companion");
+        sessionStorage.removeItem("firstidp_companion");
       }
     } catch (err) { /* sessionStorage may be unavailable */ }
 

@@ -12,7 +12,7 @@
    Full step-by-step setup is in SETUP.md.
    ========================================================================= */
 
-window.WORLDIDP_SUPABASE = {
+window.FIRSTIDP_SUPABASE = {
   SUPABASE_URL:      "https://ebxgcjijbjyttojqvgeb.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_uk7y1xctBGgPjYJJ5LxfLg_OQGrxpG_",
   SITE_ID:           "f1f5c0de-0001-4b44-8a1d-000000000001",
@@ -26,8 +26,8 @@ window.WORLDIDP_SUPABASE = {
    Internal: is Supabase configured?  (If not, we run in "local demo" mode
    so the whole flow still works while you're building.)
    ------------------------------------------------------------------------- */
-window.worldidpSupabaseReady = function () {
-  const c = window.WORLDIDP_SUPABASE || {};
+window.firstidpSupabaseReady = function () {
+  const c = window.FIRSTIDP_SUPABASE || {};
   return !!c.SUPABASE_URL && !!c.SUPABASE_ANON_KEY &&
          !/^REPLACE_/.test(c.SUPABASE_URL) && !/^REPLACE_/.test(c.SUPABASE_ANON_KEY);
 };
@@ -39,7 +39,7 @@ let _sbClientPromise = null;
 function _getClient() {
   if (_sbClientPromise) return _sbClientPromise;
   _sbClientPromise = new Promise((resolve, reject) => {
-    const cfg = window.WORLDIDP_SUPABASE;
+    const cfg = window.FIRSTIDP_SUPABASE;
     const start = () => {
       try {
         const client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
@@ -84,15 +84,15 @@ function _dataUrlToBlob(dataUrl) {
    If Supabase isn't configured yet, returns { ok:true, skipped:true } so the
    flow continues to the payment step during development.
    ------------------------------------------------------------------------- */
-window.worldidpSubmitOrder = async function (order) {
-  if (!window.worldidpSupabaseReady()) {
+window.firstidpSubmitOrder = async function (order) {
+  if (!window.firstidpSupabaseReady()) {
     console.warn("[FirstIDP] Supabase not configured — skipping upload (demo mode).");
     return { ok: true, skipped: true };
   }
   try {
-    const cfg = window.WORLDIDP_SUPABASE;
+    const cfg = window.FIRSTIDP_SUPABASE;
     const supabase = await _getClient();
-    const ref = order.ref || ("WIDP-" + Date.now());
+    const ref = order.ref || ("FIDP-" + Date.now());
 
     // 1) Upload files to Storage under a folder named after the order ref.
     const fileUrls = {};
@@ -208,7 +208,7 @@ window.worldidpSubmitOrder = async function (order) {
 // or failed email must NEVER delay or block the customer's redirect
 // to the thank-you page.
 // ────────────────────────────────────────────────────────────────
-window.worldidpSendConfirmationEmail = async function (payload) {
+window.firstidpSendConfirmationEmail = async function (payload) {
   try {
     await fetch("/api/send-confirmation-email", {
       method: "POST",
@@ -228,7 +228,7 @@ window.worldidpSendConfirmationEmail = async function (payload) {
 
 // Sends the "New order" alert to the business inbox. Same fire-and-forget
 // rule as the customer confirmation email — never blocks the redirect.
-window.worldidpSendAdminNotification = async function (payload) {
+window.firstidpSendAdminNotification = async function (payload) {
   try {
     await fetch("/api/send-admin-notification", {
       method: "POST",
@@ -248,8 +248,8 @@ window.worldidpSendAdminNotification = async function (payload) {
 // for why this is a function and not a direct table read). Returns an
 // array of rows (1 for a solo order, 2 if a travel companion was added).
 // ────────────────────────────────────────────────────────────────
-window.worldidpTrackOrder = async function (ref, email) {
-  if (!window.worldidpSupabaseReady()) {
+window.firstidpTrackOrder = async function (ref, email) {
+  if (!window.firstidpSupabaseReady()) {
     return { ok: false, error: "Tracking isn't connected yet." };
   }
   try {

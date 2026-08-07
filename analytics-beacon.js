@@ -19,10 +19,10 @@
     var device = /Mobi|Android|iPhone/.test(ua) ? 'Mobile'
       : /iPad|Tablet/.test(ua) ? 'Tablet' : 'Desktop';
 
-    var sessionId = sessionStorage.getItem('widp_sid');
+    var sessionId = sessionStorage.getItem('fidp_sid');
     if (!sessionId) {
       sessionId = 'sid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-      sessionStorage.setItem('widp_sid', sessionId);
+      sessionStorage.setItem('fidp_sid', sessionId);
     }
 
     var payload = JSON.stringify({

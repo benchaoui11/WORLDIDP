@@ -84,8 +84,8 @@
        }
      ============================================================ */
   async function fetchOrderStatus(orderId, email) {
-    if (!window.worldidpTrackOrder) return null;
-    const res = await window.worldidpTrackOrder(orderId, email);
+    if (!window.firstidpTrackOrder) return null;
+    const res = await window.firstidpTrackOrder(orderId, email);
     if (!res.ok || !res.rows || !res.rows.length) return null;
 
     const primary = res.rows[0];

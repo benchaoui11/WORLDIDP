@@ -1,4 +1,4 @@
-# دليل إعداد WorldIDP — الدفع والتخزين (Supabase + Stripe + Vercel)
+# دليل إعداد FirstIDP — الدفع والتخزين (Supabase + Stripe + Vercel)
 
 هذا الدليل يشرح خطوة بخطوة كيف تجعل الموقع يعمل بشكل كامل:
 العميل يملأ بياناته ويرفع صوره → تُحفظ في **Supabase** → يُوجَّه إلى **Stripe** للدفع → أنت تشاهد كل الطلبات في لوحة Supabase.
@@ -33,7 +33,7 @@
 ### مهم: تمرير البيانات لـ Stripe
 الكود يمرّر تلقائياً لـ Stripe:
 - `prefilled_email` — بريد العميل (يُملأ مسبقاً)
-- `client_reference_id` — مرجع الطلب الفريد (مثل `WIDP-XXXX`)
+- `client_reference_id` — مرجع الطلب الفريد (مثل `FIDP-XXXX`)
 
 هذا المرجع هو ما يربط الدفعة في Stripe بالطلب في Supabase. لتفعيل ظهور هذه القيم، في إعدادات Payment Link فعّل خيار **"prefill customer email"** إن وُجد.
 
@@ -112,7 +112,7 @@ create policy "anyone can upload documents"
    - **anon / publishable key** → ضعه مكان `SUPABASE_ANON_KEY`
 
 ```js
-window.WORLDIDP_SUPABASE = {
+window.FIRSTIDP_SUPABASE = {
   SUPABASE_URL:      "https://abcdxyz.supabase.co",
   SUPABASE_ANON_KEY: "eyJhbGci....(المفتاح العام الطويل)",
   TABLE:  "applications",

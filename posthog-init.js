@@ -3,13 +3,9 @@
 
    Only loaded from _offer/*.html, so it never runs on the white page.
 
-   SECURITY UPDATE — 2026-07-28:
-   Session Replay is disabled completely. Event analytics stays enabled,
-   but PostHog must not capture form values, document previews, signature
-   canvas content, uploaded identity images, checkout details, or admin data.
-
-   Historical recordings already stored in PostHog are not deleted by this
-   code change. Review and remove them manually from PostHog if needed.
+   Session Replay is enabled for operational debugging. Ordinary form fields
+   are visible in replay, while document previews, images, canvas content and
+   password/secret-like fields stay blocked.
    ========================================================================= */
 
 (function () {
@@ -24,6 +20,10 @@
     // Never build a person profile for an anonymous visitor. We never call
     // identify(), so in practice no profiles get created at all.
     person_profiles: 'identified_only',
+    capture_performance: false,
+    capture_dead_clicks: false,
+    capture_heatmaps: false,
+    disable_surveys: true,
 
     session_recording: {
       maskAllInputs: false,

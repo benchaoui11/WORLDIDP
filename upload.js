@@ -26,7 +26,7 @@
   (function recap(){
     const p = new URLSearchParams(location.search);
     let saved = {};
-    try { saved = JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch(e){}
+    try { saved = JSON.parse(sessionStorage.getItem("firstidp_application") || "{}"); } catch(e){}
 
     // sessionStorage holds the customer's latest choice (e.g. after switching
     // Digital ⇄ Print), so it takes priority over any stale URL parameter.
@@ -48,7 +48,7 @@
       // customer already saw at checkout (their price + companion's 20%-off price),
       // instead of silently dropping back to a single-person total.
       try {
-        const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
+        const companion = JSON.parse(sessionStorage.getItem("firstidp_companion") || "null");
         if (companion && companion.total) total += Number(companion.total) || 0;
       } catch (e) {}
       set("[data-recap-total]", String(total));
@@ -367,17 +367,17 @@
   function getOrder() {
     const p = new URLSearchParams(location.search);
     let saved = {};
-    try { saved = JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch (e) {}
+    try { saved = JSON.parse(sessionStorage.getItem("firstidp_application") || "{}"); } catch (e) {}
     // sessionStorage wins over URL so a Digital⇄Print switch is always reflected
     // in the totals and the product code sent to the payment service.
     const format = saved.format || p.get("format") || "digital";
     const validYears = parseInt(saved.validYears || p.get("valid") || "3", 10);
     // a short, unique order reference so the payment can be matched to this order
     let ref = "";
-    try { ref = sessionStorage.getItem("worldidp_ref") || ""; } catch (e) {}
+    try { ref = sessionStorage.getItem("firstidp_ref") || ""; } catch (e) {}
     if (!ref) {
-      ref = "WIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
-      try { sessionStorage.setItem("worldidp_ref", ref); } catch (e) {}
+      ref = "FIDP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+      try { sessionStorage.setItem("firstidp_ref", ref); } catch (e) {}
     }
     return { format, validYears, email: saved.email || "", ref, country: saved.country || p.get("country") || "" };
   }
@@ -505,7 +505,7 @@
     const urlParams = new URLSearchParams(location.search);
     const isCompanionStep = urlParams.get("person") === "2";
     let hasCompanion = false;
-    try { hasCompanion = !!sessionStorage.getItem("worldidp_companion"); } catch (e) {}
+    try { hasCompanion = !!sessionStorage.getItem("firstidp_companion"); } catch (e) {}
 
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden", "false");
@@ -514,7 +514,7 @@
     const files = await compressFiles(collectFiles());
 
     // Save under the right key for whoever we just captured documents for.
-    const filesKey = isCompanionStep ? "worldidp_files_companion" : "worldidp_files";
+    const filesKey = isCompanionStep ? "firstidp_files_companion" : "firstidp_files";
     try {
       sessionStorage.setItem(filesKey, JSON.stringify(files));
     } catch (e) { /* storage may be full for large images; handled below */ }
@@ -543,9 +543,9 @@
     }
 
     /* ---- DIGITAL ONLY: submit now (primary + companion, if any), then confirm ---- */
-    const saved = (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_application") || "{}"); } catch (e) { return {}; } })();
+    const saved = (() => { try { return JSON.parse(sessionStorage.getItem("firstidp_application") || "{}"); } catch (e) { return {}; } })();
     const primaryFiles = isCompanionStep
-      ? (() => { try { return JSON.parse(sessionStorage.getItem("worldidp_files") || "{}"); } catch (e) { return {}; } })()
+      ? (() => { try { return JSON.parse(sessionStorage.getItem("firstidp_files") || "{}"); } catch (e) { return {}; } })()
       : files;
     const full = Object.assign({}, order, {
       firstName: saved.firstName, lastName: saved.lastName, email: saved.email,
@@ -558,7 +558,7 @@
     // Save the full application (details + documents) to Supabase.
     // No payment is collected here — the team reviews the documents first
     // and sends secure payment instructions afterward.
-    const res = await window.worldidpSubmitOrder(full);
+    const res = await window.firstidpSubmitOrder(full);
     if (!res.ok) {
       // Track the failure. This is the one funnel step pageviews can't show:
       // the customer stays on this page, so in PostHog it just looks like
@@ -578,11 +578,11 @@
     const refs = [order.ref];
     if (hasCompanion) {
       try {
-        const companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null");
-        const compFiles = JSON.parse(sessionStorage.getItem("worldidp_files_companion") || "null");
+        const companion = JSON.parse(sessionStorage.getItem("firstidp_companion") || "null");
+        const compFiles = JSON.parse(sessionStorage.getItem("firstidp_files_companion") || "null");
         if (companion && compFiles) {
           const companionRef = order.ref + "-2";
-          const compRes = await window.worldidpSubmitOrder({
+          const compRes = await window.firstidpSubmitOrder({
             ref: companionRef,
             format: companion.format, validYears: companion.validYears, country: companion.country,
             total: companion.total, currency: "USD",
@@ -610,17 +610,17 @@
     // first. Firing without awaiting, then immediately redirecting, was
     // killing them before they left the browser. Errors are swallowed inside
     // each helper, so this can't block or break the redirect.
-    await window.worldidpSendConfirmationEmail({
+    await window.firstidpSendConfirmationEmail({
       to: full.email,
       firstName: full.firstName,
       refs,
       format: full.format,
       validYears: full.validYears,
       hasCompanion: refs.length > 1,
-      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").firstName) : null,
+      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").firstName) : null,
     });
 
-    await window.worldidpSendAdminNotification({
+    await window.firstidpSendAdminNotification({
       refs,
       orderNumber: res.orderNumber,
       firstName: full.firstName,
@@ -633,9 +633,9 @@
       total: full.total,
       hasExpress: addonState.express,
       hasCompanion: refs.length > 1,
-      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").firstName) : null,
-      companionLastName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").lastName) : null,
-      companionTotal: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("worldidp_companion") || "{}").total) : null,
+      companionFirstName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").firstName) : null,
+      companionLastName: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").lastName) : null,
+      companionTotal: refs.length > 1 ? (JSON.parse(sessionStorage.getItem("firstidp_companion") || "{}").total) : null,
     });
 
     window.location.href = "thank-you.html?ref=" + encodeURIComponent(refs.join(","));
@@ -670,8 +670,8 @@
     if (!banner) return;
     const isCompanionStep = new URLSearchParams(location.search).get("person") === "2";
     let companion = null, primary = null;
-    try { companion = JSON.parse(sessionStorage.getItem("worldidp_companion") || "null"); } catch (e) {}
-    try { primary = JSON.parse(sessionStorage.getItem("worldidp_application") || "null"); } catch (e) {}
+    try { companion = JSON.parse(sessionStorage.getItem("firstidp_companion") || "null"); } catch (e) {}
+    try { primary = JSON.parse(sessionStorage.getItem("firstidp_application") || "null"); } catch (e) {}
 
     if (isCompanionStep && companion) {
       banner.hidden = false;

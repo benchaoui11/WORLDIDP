@@ -430,28 +430,23 @@ if (logoTrack) {
     frame = requestAnimationFrame(draw);
   }
 
-  let revealed = false;
-  function maybeReveal() {
-    if (revealed) return;
-    const r = map.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    if (r.top < vh * 0.85 && r.bottom > 0) {
-      revealed = true;
-      map.classList.add("is-revealed");
-      draw();
-    }
-  }
-
-  window.addEventListener("scroll", maybeReveal, { passive: true });
   window.addEventListener("resize", schedule, { passive: true });
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(schedule);
   }
-  maybeReveal();
-  setTimeout(() => {
-    maybeReveal();
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      map.classList.add("is-revealed");
+      draw();
+    }, { rootMargin: "0px 0px -15% 0px" });
+    observer.observe(map);
+  } else {
+    map.classList.add("is-revealed");
     draw();
-  }, 400);
+  }
+  setTimeout(schedule, 400);
 })();
 
 /* ============================================================
@@ -529,25 +524,18 @@ if (logoTrack) {
   const cards = Array.from(document.querySelectorAll(".price-card.pc-reveal"));
   if (!cards.length) return;
 
-  function check() {
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    let done = true;
-    cards.forEach((c) => {
-      if (c.classList.contains("is-revealed")) return;
-      const r = c.getBoundingClientRect();
-      if (r.top < vh * 0.86 && r.bottom > 0) {
-        c.classList.add("is-revealed");
-      } else {
-        done = false;
-      }
-    });
-    if (done) window.removeEventListener("scroll", check);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -14% 0px" });
+    cards.forEach((card) => observer.observe(card));
+  } else {
+    cards.forEach((card) => card.classList.add("is-revealed"));
   }
-
-  window.addEventListener("scroll", check, { passive: true });
-  window.addEventListener("resize", check, { passive: true });
-  check();
-  setTimeout(check, 400);
 })();
 
 /* ============================================================
@@ -566,30 +554,32 @@ if (logoTrack) {
 
   function run() {
     if (started) return;
-    const r = section.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    if (r.top < vh * 0.82 && r.bottom > 0) {
-      started = true;
-      section.classList.add("is-revealed");
-      if (countEl && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const dur = 1400;
-        const t0 = performance.now();
-        const tick = (now) => {
-          const p = Math.min((now - t0) / dur, 1);
-          const eased = 1 - Math.pow(1 - p, 3);
-          countEl.textContent = fmt(Math.floor(eased * target));
-          if (p < 1) requestAnimationFrame(tick);
-          else countEl.textContent = fmt(target);
-        };
-        requestAnimationFrame(tick);
-      }
-      window.removeEventListener("scroll", run);
+    started = true;
+    section.classList.add("is-revealed");
+    if (countEl && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const dur = 1400;
+      const t0 = performance.now();
+      const tick = (now) => {
+        const p = Math.min((now - t0) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        countEl.textContent = fmt(Math.floor(eased * target));
+        if (p < 1) requestAnimationFrame(tick);
+        else countEl.textContent = fmt(target);
+      };
+      requestAnimationFrame(tick);
     }
   }
 
-  window.addEventListener("scroll", run, { passive: true });
-  run();
-  setTimeout(run, 400);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      run();
+    }, { rootMargin: "0px 0px -18% 0px" });
+    observer.observe(section);
+  } else {
+    run();
+  }
 })();
 
 /* ============================================================
@@ -651,30 +641,32 @@ if (logoTrack) {
 
   function run() {
     if (started) return;
-    const r = section.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    if (r.top < vh * 0.82 && r.bottom > 0) {
-      started = true;
-      section.classList.add("is-revealed");
-      countEls.forEach((el) => {
-        const target = parseInt(el.dataset.count, 10);
-        if (reduce) { el.textContent = target + "+"; return; }
-        const t0 = performance.now(), dur = 1300;
-        const tick = (now) => {
-          const p = Math.min((now - t0) / dur, 1);
-          const eased = 1 - Math.pow(1 - p, 3);
-          el.textContent = Math.floor(eased * target) + "+";
-          if (p < 1) requestAnimationFrame(tick);
-          else el.textContent = target + "+";
-        };
-        requestAnimationFrame(tick);
-      });
-      window.removeEventListener("scroll", run);
-    }
+    started = true;
+    section.classList.add("is-revealed");
+    countEls.forEach((el) => {
+      const target = parseInt(el.dataset.count, 10);
+      if (reduce) { el.textContent = target + "+"; return; }
+      const t0 = performance.now(), dur = 1300;
+      const tick = (now) => {
+        const p = Math.min((now - t0) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(eased * target) + "+";
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = target + "+";
+      };
+      requestAnimationFrame(tick);
+    });
   }
-  window.addEventListener("scroll", run, { passive: true });
-  run();
-  setTimeout(run, 400);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      run();
+    }, { rootMargin: "0px 0px -18% 0px" });
+    observer.observe(section);
+  } else {
+    run();
+  }
 })();
 
 /* ============================================================
