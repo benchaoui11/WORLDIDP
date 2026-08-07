@@ -1,5 +1,5 @@
 (async function () {
-  const cfg = window.WORLDIDP_SUPABASE || {};
+  const cfg = window.FIRSTIDP_SUPABASE || {};
   const client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 
   // ── Auth guard: no session -> back to login ── (unchanged)

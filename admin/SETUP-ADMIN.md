@@ -1,4 +1,4 @@
-# WorldIDP Control Tower — دليل التركيب (خطوة بخطوة)
+# FirstIDP Control Tower — دليل التركيب (خطوة بخطوة)
 
 هاد الدليل غادي يخليك تركّب نظام التبديل (Offer / White / Maintenance) + الـ`/admin` dashboard. خدم بالترتيب.
 
@@ -72,10 +72,10 @@ robots.txt                  ← محدّث (كيحجب /admin و /_white من Go
 
 ## 6) جرّب
 
-1. دخل لـ `https://worldidp.com/admin` → خاصك توصل لصفحة تسجيل الدخول.
+1. دخل لـ `https://firstidp.com/admin` → خاصك توصل لصفحة تسجيل الدخول.
 2. سجّل بالإيميل/الباسوورد اللي صاوبتي فالخطوة 2.
 3. خاصك تشوف الـdashboard: الحالة الحية = 🟢 **OFFER PAGE**.
-4. اضغط **White Page** → أكّد → افتح tab جديد وزور `worldidp.com` → خاصك تشوف White Page.
+4. اضغط **White Page** → أكّد → افتح tab جديد وزور `firstidp.com` → خاصك تشوف White Page.
 5. رجع لـ `/admin`، اضغط **Offer Page** → أكّد → الموقع يرجع للحقيقي.
 
 ---

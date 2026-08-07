@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════
 // POST /api/send-confirmation-email
-// Body: { to, firstName, refs: ["WIDP-...", "WIDP-...-2"?], format,
+// Body: { to, firstName, refs: ["FIDP-...", "FIDP-...-2"?], format,
 //         validYears, hasCompanion, companionFirstName? }
 // ════════════════════════════════════════════════════════════════
 // Sends the "application received" confirmation email via Resend,

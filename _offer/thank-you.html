@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" data-site-mode="offer">
 <head>
-  <script src="/google-tag.js"></script>
+  <script src="/google-tag.js" defer></script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Application Received | FirstIDP</title>
-  <meta name="description" content="Your International Driving Permit application has been received." />
+  <meta name="description" content="Your FirstIDP International Driving Permit application has been received and is ready for document review." />
+  <link rel="canonical" href="https://firstidp.com/thank-you.html" />
 
   <link rel="icon" href="IMAGES/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="IMAGES/favicon-32.png" />
@@ -163,14 +164,14 @@
   <script>
     (function () {
       var refsParam = '';
-      try { refsParam = sessionStorage.getItem('worldidp_ref') || ''; } catch (e) {}
+      try { refsParam = sessionStorage.getItem('firstidp_ref') || ''; } catch (e) {}
       var params = new URLSearchParams(location.search);
       if (params.get('ref')) refsParam = params.get('ref'); // URL wins — it's what the submit step actually used
       var refs = refsParam.split(',').map(function (r) { return r.trim(); }).filter(Boolean);
 
       var companion = null, primary = null;
-      try { companion = JSON.parse(sessionStorage.getItem('worldidp_companion') || 'null'); } catch (e) {}
-      try { primary = JSON.parse(sessionStorage.getItem('worldidp_application') || 'null'); } catch (e) {}
+      try { companion = JSON.parse(sessionStorage.getItem('firstidp_companion') || 'null'); } catch (e) {}
+      try { primary = JSON.parse(sessionStorage.getItem('firstidp_application') || 'null'); } catch (e) {}
 
       /* ---- Google Ads conversion -------------------------------------
          Fires on page load, which is why the ?ref= in the URL is
@@ -197,14 +198,14 @@
         var table = PRICES[primary && primary.format] || PRICES.digital;
         var value = table[primary && primary.validYears] || 49;
 
-        if (typeof gtag === 'function') {
-          gtag('event', 'conversion', {
-            'send_to': 'AW-11043881603/29SbCODwltIcEIOFkZIp',
-            'value': value,
-            'currency': 'USD',
-            'transaction_id': refs[0] || ''
-          });
-        }
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-11043881603/29SbCODwltIcEIOFkZIp',
+          'value': value,
+          'currency': 'USD',
+          'transaction_id': refs[0] || ''
+        });
       } catch (e) {
         // Analytics must never break the confirmation page. The customer
         // seeing their tracking number matters more than we do.
