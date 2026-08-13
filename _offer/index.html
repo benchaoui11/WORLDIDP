@@ -424,7 +424,7 @@
         <div class="application-card" id="apply" aria-labelledby="eligibility-title">
           <div class="card-glow" aria-hidden="true"></div>
           <p class="form-kicker">Start with your route</p>
-          <h2 id="eligibility-title">Check your license country and travel destination</h2>
+          <h2 id="eligibility-title">Check if you're eligible to get an International Driving Permit</h2>
 
           <form class="eligibility-form" action="#" method="get">
             <label for="issued-country">Where was your License Issued?</label>
@@ -444,49 +444,47 @@
               data-country-combo
               data-kind="destination"
               data-placeholder="Search destination..."
-              data-default="Thailand"
+              data-empty-label="Select your destination"
             >
-              <input type="hidden" id="destination-country" name="destination-country" value="Thailand" />
+              <input type="hidden" id="destination-country" name="destination-country" value="" />
             </div>
-
-            <button class="btn btn-apply" type="submit">
-              <svg class="shield-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 2.2 4.4 5.1c-.5.2-.8.6-.8 1.1v5.2c0 4.5 2.9 8.5 7.2 10.2.8.3 1.6.3 2.4 0 4.3-1.7 7.2-5.7 7.2-10.2V6.2c0-.5-.3-.9-.8-1.1L12 2.2Z" fill="currentColor"/>
-                <path d="m8.6 12.2 2.3 2.3 4.5-4.7" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span data-apply-text>Check My Route</span>
-            </button>
 
             <div class="eligibility-result" data-eligibility-result aria-live="polite">
               <span class="result-icon" aria-hidden="true">✓</span>
               <div>
-                <strong>You’re all set.</strong>
+                <strong data-result-title>IDP accepted</strong>
                 <p data-result-text>Continue to prepare your IDP — ready in minutes.</p>
               </div>
             </div>
+
+            <button class="btn btn-apply" type="submit" disabled>
+              <svg class="shield-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2.2 4.4 5.1c-.5.2-.8.6-.8 1.1v5.2c0 4.5 2.9 8.5 7.2 10.2.8.3 1.6.3 2.4 0 4.3-1.7 7.2-5.7 7.2-10.2V6.2c0-.5-.3-.9-.8-1.1L12 2.2Z" fill="currentColor"/>
+                <path d="m8.6 12.2 2.3 2.3 4.5-4.7" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span data-apply-text>Start My Application!</span>
+            </button>
           </form>
         </div>
 
         <div class="hero-copy">
-          <p class="fine-alert">Drive abroad with confidence</p>
+          <p class="fine-alert">Your driving licence alone isn't always enough abroad</p>
           <h1 id="hero-title">Get Your <span>International Driving Permit</span> in 8 Minutes</h1>
           <p class="lead">
-            Don't let paperwork slow down your trip. It's the multilingual translation of your national driving licence — also known as an <a href="what-is-idp.html">International Driving Permit (IDP)</a> — for driving and car rentals in <a href="countries.html">195+ countries</a>. No appointment, no waiting: apply online and your digital IDP is ready in 8 minutes, with an optional printed copy shipped worldwide.
+            Many rental counters and police abroad won't accept a foreign licence alone — without an <a href="what-is-idp.html">International Driving Permit (IDP)</a>, you risk being turned away at pickup or fined on the road. Fill out the form online and get your digital IDP within 8 minutes, with an optional printed copy shipped worldwide.
           </p>
           <p class="hero-disclosure">Your IDP is carried together with your valid national licence when driving abroad.</p>
 
           <ul class="benefit-grid" aria-label="FirstIDP benefits">
-            <li>Digital IDP in as little as 8 minutes</li>
-            <li>Multilingual licence translation</li>
-            <li>Digital &amp; printed options</li>
-            <li>24/7 order assistance</li>
+            <li>Digital IDP in 8 minutes</li>
+            <li>Valid in 195+ countries</li>
           </ul>
         </div>
 
         <div class="partners-strip" aria-label="Car rental brands commonly used by international travelers">
           <div class="strip-heading">
-            <span>Trusted travel preparation</span>
-            <strong>Prepare your document before reaching the rental desk</strong>
+            <span>Rental desk ready</span>
+            <strong>Accepted by major car rental companies worldwide.</strong>
           </div>
 
           <div class="logo-slider" data-slider>
