@@ -45,10 +45,6 @@
   })();
   const expYear = 2026 + order.validYears;
 
-  /* ---------- prefill recipient + country ---------- */
-  if (order.firstName) $("#first-name").value = order.firstName;
-  if (order.lastName)  $("#last-name").value = order.lastName;
-
   // Build the country dropdown (editable). Pre-selects the country from step 1,
   // but the customer can change their delivery country if they wish.
   const COUNTRY_NAMES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Cambodia","Cameroon","Canada","Cape Verde","Chad","Chile","China","Colombia","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Ethiopia","Fiji","Finland","France","Gabon","Georgia","Germany","Ghana","Greece","Guatemala","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Seychelles","Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
@@ -72,18 +68,14 @@
   /* ---------- pricing state ---------- */
   // Shipping is always free now — it never affects the total, so it's not
   // part of this pricing state at all anymore (previously: state.shipping).
-  const state = { express: false, expressPrice: 14, couponPct: 0, couponCode: "" };
+  // express stays in state (always false) purely so the payload shape sent
+  // to the backend is unchanged — the UI to toggle it has been removed.
+  const state = { express: false, couponPct: 0, couponCode: "" };
 
   function recalc() {
-    const product = productPrice;
-    const express = state.express ? state.expressPrice : 0;
-    const subtotal = product + express;
+    const subtotal = productPrice;
     const discount = Math.round(subtotal * state.couponPct);
     const total = subtotal - discount;
-
-    const expressLine = $('[data-line="express"]');
-    if (state.express) { expressLine.classList.remove("is-hidden"); $("[data-sum-express]").textContent = `$${express}`; }
-    else expressLine.classList.add("is-hidden");
 
     const couponLine = $('[data-line="coupon"]');
     const wasEl = $("[data-sum-was]");
@@ -99,20 +91,8 @@
     }
 
     $("[data-sum-total]").textContent = total;
-    $("[data-pay-text]").textContent = `Pay $${total} securely`;
     state._total = total;
   }
-
-  /* ---------- express-processing checkbox ---------- */
-  const expressEl = $("[data-express]");
-  expressEl.addEventListener("click", (e) => {
-    e.preventDefault();
-    state.express = !state.express;
-    expressEl.classList.toggle("is-active", state.express);
-    $("input", expressEl).checked = state.express;
-    state.expressPrice = parseInt(expressEl.dataset.price, 10);
-    recalc();
-  });
 
   /* ---------- coupon ---------- */
   // TEMPORARY: until real payment (Stripe) is connected, coupons must never
@@ -137,19 +117,15 @@
     if (field) field.classList.toggle("show-err", !ok);
     return ok;
   }
-  const REQUIRED = ["#first-name","#last-name","#addr1","#state","#city","#zip"];
+  const REQUIRED = ["#addr1","#state","#city","#zip"];
   function validate() {
     let ok = true;
     REQUIRED.forEach((sel) => { const el = $(sel); ok = markField(el, el.value.trim().length > 0) && ok; });
-    const terms = $("#agree");
-    const termsOk = terms.checked;
-    $("[data-terms]").classList.toggle("show-err", !termsOk);
-    return ok && termsOk;
+    return ok;
   }
   $$(".input").forEach((el) => el.addEventListener("input", () => {
     el.classList.remove("invalid"); el.closest(".field")?.classList.remove("show-err");
   }));
-  $("#agree").addEventListener("change", () => $("[data-terms]").classList.remove("show-err"));
 
   /* ---------- submit → Supabase → payment service ---------- */
   const overlay = $("#overlay");
@@ -180,7 +156,7 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validate()) {
-      const bad = $(".input.invalid") || (!$("#agree").checked ? $("[data-terms]") : null);
+      const bad = $(".input.invalid");
       bad?.scrollIntoView({ behavior:"smooth", block:"center" });
       return;
     }
@@ -202,8 +178,8 @@
       country: order.country,
       total: state._total,
       currency: "USD",
-      firstName: $("#first-name").value.trim(),
-      lastName: $("#last-name").value.trim(),
+      firstName: order.firstName,
+      lastName: order.lastName,
       email: order.email,
       phone: order.phone,
       category: order.category,

@@ -125,7 +125,7 @@
     const btnText = $("[data-btn-text]");
     btn.disabled = false;
     btn.classList.toggle("is-incomplete", !all);
-    btnText.textContent = all ? "Continue to payment" : "Complete the steps above to continue";
+    btnText.textContent = all ? "Continue to payment" : "Finish uploading to continue";
   }
 
   // Add a red "missing" highlight to any step the customer hasn't completed,

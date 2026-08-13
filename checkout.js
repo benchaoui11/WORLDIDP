@@ -132,7 +132,7 @@
       label: "Print + Digital",
       sumName: "Print + Digital IDP",
       feats: [
-        "Printed booklet + pocket ID card shipped to you",
+        "Printed booklet shipped to you",
         "Free digital copy included instantly",
         "Globally recognised standard format",
         "Trusted by police & rental desks worldwide"
@@ -253,10 +253,21 @@
   });
 
   /* ---------- license category (multi-select) -> preview ---------- */
+  const CATEGORY_NAMES = { A: "Motorcycle", B: "Car", C: "Truck", D: "Bus", E: "" };
+  const catSelectedLabel = $("[data-cat-selected]");
   function refreshCategory() {
     const checked = $$('input[name="category"]:checked').map((c) => c.value).sort();
     state.category = checked.join(", ");
     pmCat.textContent = checked.length ? checked.join(", ") : "—";
+
+    if (catSelectedLabel) {
+      if (checked.length) {
+        catSelectedLabel.textContent = checked.map((v) => (CATEGORY_NAMES[v] ? `${v} - ${CATEGORY_NAMES[v]}` : v)).join(", ");
+        catSelectedLabel.classList.remove("is-hidden");
+      } else {
+        catSelectedLabel.classList.add("is-hidden");
+      }
+    }
   }
   $$('input[name="category"]').forEach((c) => {
     c.addEventListener("change", refreshCategory);

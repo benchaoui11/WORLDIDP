@@ -164,18 +164,22 @@ const renderCountryList = (combo, query = "") => {
   }
 };
 
+const globeIconMarkup =
+  '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.4 2.6 15.6 0 18M12 3c-2.6 2.4-2.6 15.6 0 18"/></svg>';
+
 countryCombos.forEach((combo) => {
   const hiddenInput = combo.querySelector("input[type='hidden']");
   const defaultName = combo.dataset.default;
-  const defaultCountry =
-    [...destinationPriority, ...countries].find((country) => country.name === defaultName || country.value === defaultName) ||
-    countries[0];
+  const defaultCountry = defaultName
+    ? [...destinationPriority, ...countries].find((country) => country.name === defaultName || country.value === defaultName)
+    : null;
+  const emptyLabel = combo.dataset.emptyLabel || combo.dataset.placeholder;
 
   combo.insertAdjacentHTML(
     "beforeend",
     `<button class="country-trigger" type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="country-trigger-icon" aria-hidden="true">${defaultCountry.flag}</span>
-      <span class="country-trigger-text">${defaultCountry.name}</span>
+      <span class="country-trigger-icon${defaultCountry ? "" : " is-placeholder"}" aria-hidden="true">${defaultCountry ? defaultCountry.flag : globeIconMarkup}</span>
+      <span class="country-trigger-text${defaultCountry ? "" : " is-placeholder"}">${defaultCountry ? defaultCountry.name : emptyLabel}</span>
       <span class="country-trigger-arrow" aria-hidden="true"></span>
     </button>
     <div class="country-menu">
@@ -186,7 +190,7 @@ countryCombos.forEach((combo) => {
     </div>`
   );
 
-  hiddenInput.value = defaultCountry.value || defaultCountry.name;
+  hiddenInput.value = defaultCountry ? (defaultCountry.value || defaultCountry.name) : "";
   renderCountryList(combo);
 
   const trigger = combo.querySelector(".country-trigger");
@@ -213,24 +217,13 @@ countryCombos.forEach((combo) => {
     if (!option) return;
     hiddenInput.value = option.dataset.value;
     triggerIcon.textContent = option.dataset.flag;
+    triggerIcon.classList.remove("is-placeholder");
     triggerText.textContent = option.dataset.name;
-    eligibilityResult?.classList.remove("is-visible");
-    eligibilityForm?.querySelector(".btn-apply")?.classList.remove("is-success");
-    const applyText = eligibilityForm?.querySelector("[data-apply-text]");
-    if (applyText) applyText.textContent = "Check My Route";
-    // Restore the shield icon too — otherwise it stays as the arrow from a
-    // previous "Continue to Checkout" state even though the button text
-    // and color have reset to the initial "check my route" state.
-    const applyIcon = eligibilityForm?.querySelector(".btn-apply svg");
-    if (applyIcon && applyIcon.classList.contains("arrow-icon")) {
-      applyIcon.outerHTML = `<svg class="shield-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2.2 4.4 5.1c-.5.2-.8.6-.8 1.1v5.2c0 4.5 2.9 8.5 7.2 10.2.8.3 1.6.3 2.4 0 4.3-1.7 7.2-5.7 7.2-10.2V6.2c0-.5-.3-.9-.8-1.1L12 2.2Z" fill="currentColor"/>
-        <path d="m8.6 12.2 2.3 2.3 4.5-4.7" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-    }
+    triggerText.classList.remove("is-placeholder");
     combo.classList.remove("is-open");
     trigger.setAttribute("aria-expanded", "false");
     trigger.focus();
+    updateEligibilityResult();
   });
 });
 
@@ -242,61 +235,50 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeCountryCombos();
 });
 
-eligibilityForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const button = eligibilityForm.querySelector(".btn-apply");
-  const text = eligibilityForm.querySelector("[data-apply-text]");
-  if (!button || !text) return;
+function getComboValue(kind) {
+  const text = document.querySelector(`[data-kind="${kind}"] .country-trigger-text`);
+  if (!text || text.classList.contains("is-placeholder")) return null;
+  return text.textContent;
+}
 
-  const issued = document.querySelector('[data-kind="issued"] .country-trigger-text')?.textContent || "your country";
-  const destination = document.querySelector('[data-kind="destination"] .country-trigger-text')?.textContent || "your destination";
-  const printedRequired = new Set(["Japan", "China", "France", "Morocco", "Oman", "Saudi Arabia"]);
+// Shows the green eligibility banner and enables the apply button as soon
+// as a destination is picked — no separate "check" click or fake delay,
+// since the destination selection itself is the signal the visitor needs
+// an answer now.
+function updateEligibilityResult() {
+  const destination = getComboValue("destination");
+  const button = eligibilityForm?.querySelector(".btn-apply");
 
-  // If eligibility already confirmed, this click continues to checkout.
-  if (button.classList.contains("is-success")) {
-    const params = new URLSearchParams();
-    if (destination && destination !== "your destination") params.set("destination-country", destination);
-    if (issued && issued !== "your country") params.set("issued-country", issued);
-    if (printedRequired.has(destination)) params.set("format", "physical");
-    window.location.href = "checkout.html" + (params.toString() ? "?" + params.toString() : "");
+  if (!destination) {
+    eligibilityResult?.classList.remove("is-visible");
+    if (button) button.disabled = true;
     return;
   }
 
-  button.classList.remove("is-success");
-  button.classList.add("is-submitted");
-  text.textContent = "Checking your route...";
-  eligibilityResult?.classList.remove("is-visible");
+  const resultTitle = eligibilityResult?.querySelector("[data-result-title]");
+  if (resultTitle) resultTitle.textContent = `IDP accepted for ${destination}`;
+  if (resultText) {
+    resultText.textContent = `Go Digital and you're set in minutes — or add Printed for longer trips. Your choice.`;
+  }
+  eligibilityResult?.classList.add("is-visible");
+  if (button) button.disabled = false;
 
-  window.setTimeout(() => {
-    text.textContent = "Continue to Checkout";
-    button.classList.remove("is-submitted");
-    button.classList.add("is-success");
+  window.fidpTrack?.("route_checked", {
+    destination,
+    issued_country: getComboValue("issued"),
+  });
+}
 
-    window.fidpTrack?.("route_checked", {
-      destination: destination !== "your destination" ? destination : null,
-      issued_country: issued !== "your country" ? issued : null,
-      requires_printed: printedRequired.has(destination),
-    });
+eligibilityForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const destination = getComboValue("destination");
+  if (!destination) return;
 
-    // The icon changes from a shield (verification) to an arrow (proceed),
-    // so the button visually says "click me to go forward" instead of
-    // looking like the same confirmation state as before. Customers were
-    // reading "Continue to Checkout" but not realizing this exact button
-    // needed a second click to reach checkout.
-    const icon = button.querySelector("svg");
-    if (icon) {
-      icon.outerHTML = `<svg class="shield-icon arrow-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M5 12h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="m13 6 6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-    }
-    if (resultText) {
-      resultText.textContent = printedRequired.has(destination)
-        ? `You're all set for ${destination}. ${destination} requires a printed IDP — choose Print + Digital.`
-        : `You're all set for ${destination}. Digital is enough — ready in minutes.`;
-    }
-    eligibilityResult?.classList.add("is-visible");
-  }, 1600);
+  const issued = getComboValue("issued");
+  const params = new URLSearchParams();
+  params.set("destination-country", destination);
+  if (issued) params.set("issued-country", issued);
+  window.location.href = "checkout.html?" + params.toString();
 });
 
 if (logoTrack) {

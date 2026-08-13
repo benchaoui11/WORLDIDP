@@ -263,6 +263,13 @@ ul{margin:0;padding:0;list-style:none;}
   animation:pop .25s ease;
 }
 
+.cat-selected-label{display:block;width:100%;box-sizing:border-box;margin:14px 0 0;padding:9px 18px;
+  border-radius:20px;background:linear-gradient(135deg,var(--blue-900),var(--blue-700));color:#fff;
+  font-weight:800;font-size:.86rem;line-height:1.4;text-align:center;white-space:normal;
+  box-shadow:0 10px 24px rgba(18,42,99,.22);transition:opacity .2s ease,transform .2s ease;}
+.cat-selected-label.is-hidden{display:none;}
+.is-hidden{display:none !important;}
+
 /* =========================================================================
    FORMAT SELECTOR (validity tabs + product cards)
    ========================================================================= */
@@ -279,24 +286,27 @@ ul{margin:0;padding:0;list-style:none;}
 
 .plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .plan{position:relative;display:flex;flex-direction:column;cursor:pointer;border:1.5px solid var(--line);border-radius:20px;
-  background:rgba(255,255,255,.88);padding:40px 16px 14px;transition:all .22s ease;overflow:hidden;}
+  background:rgba(255,255,255,.88);padding:0 0 14px;transition:all .22s ease;overflow:hidden;}
 .plan input{position:absolute;opacity:0;pointer-events:none;}
 .plan:hover{transform:translateY(-3px);border-color:rgba(7,88,216,.3);box-shadow:0 18px 38px rgba(7,88,216,.12);}
 .plan.is-active{border-color:var(--blue-600);box-shadow:0 20px 44px rgba(36,86,230,.2);}
 .plan.is-active::before{content:"";position:absolute;inset:0;border-radius:inherit;
   background:radial-gradient(circle at 80% -10%,rgba(36,86,230,.1),transparent 60%);pointer-events:none;}
+.plan-media{display:flex;align-items:center;justify-content:center;height:118px;
+  background:linear-gradient(135deg,rgba(36,86,230,.07),rgba(21,160,107,.06));}
+.plan-media img{max-width:100%;height:100%;width:auto;object-fit:contain;display:block;}
 .plan-rec{position:absolute;top:12px;right:12px;padding:4px 9px;border-radius:999px;
   background:linear-gradient(135deg,var(--ok),#1fc285);color:#fff;font-size:.62rem;font-weight:900;
-  letter-spacing:.04em;text-transform:uppercase;box-shadow:0 6px 14px rgba(21,160,107,.32);z-index:2;}
-.plan-name{font-weight:900;color:var(--blue-950);font-size:1.04rem;line-height:1.2;}
-.plan-tag{margin-top:5px;color:var(--muted);font-size:.78rem;font-weight:600;line-height:1.3;min-height:2.6em;}
-.plan-price{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:12px;}
+  letter-spacing:.04em;text-transform:uppercase;box-shadow:0 6px 14px rgba(21,160,107,.32);z-index:3;}
+.plan-name{font-weight:900;color:var(--blue-950);font-size:1.04rem;line-height:1.2;padding:12px 16px 0;}
+.plan-tag{margin-top:5px;color:var(--muted);font-size:.78rem;font-weight:600;line-height:1.3;min-height:2.6em;padding:0 16px;}
+.plan-price{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding:12px 16px 0;}
 .plan-now{font-weight:900;color:var(--blue-700);font-size:1.5rem;letter-spacing:-.01em;}
 .plan-was{color:#9aa6bd;font-size:.92rem;font-weight:700;text-decoration:line-through;}
 .plan-save{margin-left:auto;padding:3px 8px;border-radius:999px;background:var(--ok-soft);color:#0f7a51;
   font-size:.66rem;font-weight:900;}
 .plan-check{position:absolute;top:14px;left:14px;width:22px;height:22px;border-radius:50%;
-  border:2px solid var(--line);background:#fff;transition:all .2s ease;z-index:2;}
+  border:2px solid var(--line);background:#fff;transition:all .2s ease;z-index:3;}
 .plan.is-active .plan-check{border-color:transparent;
   background:var(--blue-700) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/13px no-repeat;}
 
@@ -466,12 +476,32 @@ ul{margin:0;padding:0;list-style:none;}
   .form-card{padding:22px 18px;}
   .grid-2,.grid-3{grid-template-columns:1fr;}
   .grid-3.dob{grid-template-columns:1fr 1fr 1fr;}
-  .cat-grid{grid-template-columns:repeat(3,1fr);}
-  .plan-grid{grid-template-columns:1fr;}
+  /* License category and format stay in one row / two columns even on
+     mobile — only the sizing shrinks, never the layout — so they keep
+     reading as a single compact chooser instead of an unbalanced wrap. */
+  .cat label{padding:11px 2px 9px;gap:6px;}
+  .cat label .cat-ico{width:20px;height:15px;}
+  .cat label .cat-letter{font-size:.86rem;}
+  .cat label::after{width:17px;height:17px;}
+  .plan-media{height:92px;}
+  .plan-name{font-size:.92rem;padding:9px 10px 0;}
+  .plan-tag{font-size:.7rem;padding:0 10px;min-height:2.4em;}
+  .plan-price{padding:8px 10px 0;}
+  .plan-now{font-size:1.22rem;}
+  .plan-rec{font-size:.55rem;padding:3px 7px;top:8px;right:8px;}
+  .plan-check{width:18px;height:18px;top:8px;left:8px;}
   .fieldset-sub{margin-left:0;}
 }
 @media (max-width:480px){
-  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .cat label{padding:8px 1px 7px;gap:4px;}
+  .cat label .cat-ico{width:16px;height:12px;}
+  .cat label .cat-letter{font-size:.72rem;}
+  .cat label::after{width:14px;height:14px;border-width:1.2px;}
+  .plan-media{height:76px;}
+  .plan-name{font-size:.82rem;padding:8px 8px 0;}
+  .plan-tag{font-size:.64rem;padding:0 8px;min-height:2.2em;}
+  .plan-price{padding:6px 8px 0;}
+  .plan-now{font-size:1.05rem;}
   .back-link span{display:none;}
   .back-link{padding:0 12px;}
   .flow-head h1{font-size:1.55rem;}

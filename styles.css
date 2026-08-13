@@ -536,6 +536,18 @@ select {
   transform: rotate(225deg) translate(-2px, -1px);
 }
 
+.country-trigger-icon.is-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue-500);
+}
+
+.country-trigger-text.is-placeholder {
+  color: #66758c;
+  font-weight: 700;
+}
+
 .country-menu {
   position: absolute;
   z-index: 50;
@@ -673,6 +685,13 @@ select {
 }
 
 .btn-apply.is-submitted {
+  pointer-events: none;
+}
+
+.btn-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
   pointer-events: none;
 }
 
